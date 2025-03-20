@@ -131,14 +131,12 @@ class Character
 
     public function findAll(): array
     {
-        $stmt = $this->pdo->query('SELECT * FROM characters');
-        $characters = [];
-
-        while ($data = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $characters[] = self::fromArray($data, $this->pdo);
-        }
-
-        return $characters;
+        $sql = "SELECT c.*, f.faction_name, e.name as equipment_name 
+                FROM characters c 
+                LEFT JOIN factions f ON c.faction_id = f.id
+                LEFT JOIN equipments e ON c.equipment_id = e.id";
+        $stmt = $this->pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function save(): bool
@@ -200,5 +198,26 @@ class Character
 
         $stmt = $this->pdo->prepare('DELETE FROM characters WHERE id = :id');
         return $stmt->execute(['id' => $this->id]);
+    }
+
+    public static function findByName(PDO $pdo, string $name): ?self
+    {
+        $stmt = $pdo->prepare('SELECT * FROM characters WHERE name = :name');
+        $stmt->execute(['name' => $name]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$data) {
+            return null;
+        }
+
+        $character = new self($pdo);
+        $character->id = (int) $data['id'];
+        $character->name = $data['name'];
+        $character->birth_date = $data['birth_date'];
+        $character->kingdom = $data['kingdom'];
+        $character->equipment_id = (int) $data['equipment_id'];
+        $character->faction_id = (int) $data['faction_id'];
+
+        return $character;
     }
 }
