@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Read;
 
 use App\Model\Faction;
 use PDO;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class GetFactionsController
+class ReadFactionsController
 {
     public function __construct(private PDO $pdo)
     {

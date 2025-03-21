@@ -3,12 +3,13 @@
 use DI\Container;
 use Slim\Factory\AppFactory;
 use App\Controller\GreetingController;
-use App\Controller\CreateFactionsController;
-use App\Controller\GetFactionsController;
-use App\Controller\CreateEquipmentsController;
-use App\Controller\GetEquipmentsController;
-use App\Controller\GetCharactersController;
-use App\Controller\CreateCharactersController;
+use App\Controller\Create\CreateFactionsController;
+use App\Controller\Read\ReadFactionsController;
+use App\Controller\Create\CreateEquipmentsController;
+use App\Controller\Read\ReadEquipmentsController;
+use App\Controller\Read\ReadCharactersController;
+use App\Controller\Create\CreateCharactersController;
+use App\Controller\Read\ReadCharacterByIdController;
 use Slim\Middleware\BodyParsingMiddleware;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -17,27 +18,27 @@ require __DIR__ . '/../vendor/autoload.php';
 $container = new Container();
 
 // Configure database connection
-$container->set(\PDO::class, function () {
-    $host = getenv('DB_HOST') ?: 'db';
-    $dbname = getenv('DB_NAME') ?: 'lotr';
-    $username = getenv('DB_USER') ?: 'root';
-    $password = getenv('DB_PASSWORD') ?: 'root';
-
+$container->set('db', function () {
     try {
-        $pdo = new \PDO(
-            "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
-            $username,
-            $password,
-            [
-                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-                \PDO::ATTR_EMULATE_PREPARES => false,
-            ]
+        $db = new \PDO(
+            "mysql:host=db;dbname=lotr",
+            "root",
+            "root",
+            [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
         );
-        return $pdo;
+        return $db;
     } catch (\PDOException $e) {
         throw new \Exception("Database connection failed: " . $e->getMessage());
     }
+});
+
+// Register controllers
+$container->set(ReadCharacterByIdController::class, function (Container $c) {
+    return new ReadCharacterByIdController($c->get('db'));
+});
+
+$container->set(ReadCharactersController::class, function (Container $c) {
+    return new ReadCharactersController($c->get('db'));
 });
 
 // Create App
@@ -47,16 +48,17 @@ $app = AppFactory::create();
 // Add Error Middleware
 $app->addErrorMiddleware(true, true, true);
 
-// Add JSON parsing middleware with debug logging
+// Add JSON parsing middleware
 $app->add(new BodyParsingMiddleware());
 
 // Add routes
 $app->get('/', GreetingController::class);
 $app->post('/factions', CreateFactionsController::class);
-$app->get('/factions', GetFactionsController::class);
+$app->get('/factions', ReadFactionsController::class);
 $app->post('/equipments', CreateEquipmentsController::class);
-$app->get('/equipments', GetEquipmentsController::class);
-$app->get('/characters', GetCharactersController::class);
+$app->get('/equipments', ReadEquipmentsController::class);
+$app->get('/characters', ReadCharactersController::class);
+$app->get('/characters/{id}', ReadCharacterByIdController::class);
 $app->post('/characters', CreateCharactersController::class);
 
 $app->run();

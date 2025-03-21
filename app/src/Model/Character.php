@@ -12,6 +12,9 @@ class Character
     private string $kingdom;
     private int $equipment_id;
     private int $faction_id;
+    private string $faction_name;
+    private array $equipment_ids;
+    private array $equipment_names;
 
     public function __construct(private PDO $pdo)
     {
@@ -83,6 +86,39 @@ class Character
         return $this;
     }
 
+    public function getFactionName(): string
+    {
+        return $this->faction_name;
+    }
+
+    public function setFactionName(string $faction_name): self
+    {
+        $this->faction_name = $faction_name;
+        return $this;
+    }
+
+    public function getEquipmentIds(): array
+    {
+        return $this->equipment_ids;
+    }
+
+    public function setEquipmentIds(array $equipment_ids): self
+    {
+        $this->equipment_ids = $equipment_ids;
+        return $this;
+    }
+
+    public function getEquipmentNames(): array
+    {
+        return $this->equipment_names;
+    }
+
+    public function setEquipmentNames(array $equipment_names): self
+    {
+        $this->equipment_names = $equipment_names;
+        return $this;
+    }
+
     public function fromArray(array $data, PDO $pdo): self
     {
         $character = new self($pdo);
@@ -96,7 +132,10 @@ class Character
             ->setBirthDate($data['birth_date'])
             ->setKingdom($data['kingdom'])
             ->setEquipmentId($data['equipment_id'])
-            ->setFactionId($data['faction_id']);
+            ->setFactionId($data['faction_id'])
+            ->setFactionName($data['faction_name'] ?? '')
+            ->setEquipmentIds([$data['equipment_id']])
+            ->setEquipmentNames([$data['equipment_name'] ?? '']);
     }
 
     public function toArray(): array
@@ -106,7 +145,10 @@ class Character
             'birth_date' => $this->birth_date,
             'kingdom' => $this->kingdom,
             'equipment_id' => $this->equipment_id,
-            'faction_id' => $this->faction_id
+            'faction_id' => $this->faction_id,
+            'faction_name' => $this->faction_name,
+            'equipment_ids' => $this->equipment_ids,
+            'equipment_names' => $this->equipment_names
         ];
 
         if (isset($this->id)) {
@@ -118,7 +160,9 @@ class Character
 
     public function find(int $id): ?self
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM characters WHERE id = :id');
+        $sql = "SELECT * FROM characters WHERE id = :id";
+
+        $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['id' => $id]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -126,17 +170,59 @@ class Character
             return null;
         }
 
+        // Obtener el nombre de la facción
+        $sql = "SELECT faction_name FROM factions WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['id' => $data['faction_id']]);
+        $faction = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data['faction_name'] = $faction ? $faction['faction_name'] : '';
+
+        // Obtener el nombre del equipamiento
+        $sql = "SELECT name FROM equipments WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['id' => $data['equipment_id']]);
+        $equipment = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data['equipment_name'] = $equipment ? $equipment['name'] : '';
+
         return self::fromArray($data, $this->pdo);
     }
 
     public function findAll(): array
     {
-        $sql = "SELECT c.*, f.faction_name, e.name as equipment_name 
-                FROM characters c 
-                LEFT JOIN factions f ON c.faction_id = f.id
-                LEFT JOIN equipments e ON c.equipment_id = e.id";
+        $sql = "SELECT * FROM characters";
         $stmt = $this->pdo->query($sql);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $characters = [];
+
+        while ($data = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            // Obtener el nombre de la facción
+            $sql = "SELECT faction_name FROM factions WHERE id = :id";
+            $stmt2 = $this->pdo->prepare($sql);
+            $stmt2->execute(['id' => $data['faction_id']]);
+            $faction = $stmt2->fetch(PDO::FETCH_ASSOC);
+            $data['faction_name'] = $faction ? $faction['faction_name'] : '';
+
+            // Obtener el nombre del equipamiento
+            $sql = "SELECT name FROM equipments WHERE id = :id";
+            $stmt2 = $this->pdo->prepare($sql);
+            $stmt2->execute(['id' => $data['equipment_id']]);
+            $equipment = $stmt2->fetch(PDO::FETCH_ASSOC);
+            $data['equipment_name'] = $equipment ? $equipment['name'] : '';
+
+            $character = new self($this->pdo);
+            $character->setId($data['id'])
+                     ->setName($data['name'])
+                     ->setBirthDate($data['birth_date'])
+                     ->setKingdom($data['kingdom'])
+                     ->setEquipmentId($data['equipment_id'])
+                     ->setFactionId($data['faction_id'])
+                     ->setFactionName($data['faction_name'])
+                     ->setEquipmentIds([$data['equipment_id']])
+                     ->setEquipmentNames([$data['equipment_name']]);
+
+            $characters[] = $character;
+        }
+
+        return $characters;
     }
 
     public function save(): bool
@@ -210,14 +296,64 @@ class Character
             return null;
         }
 
-        $character = new self($pdo);
-        $character->id = (int) $data['id'];
-        $character->name = $data['name'];
-        $character->birth_date = $data['birth_date'];
-        $character->kingdom = $data['kingdom'];
-        $character->equipment_id = (int) $data['equipment_id'];
-        $character->faction_id = (int) $data['faction_id'];
+        return self::fromArray($data, $pdo);
+    }
 
-        return $character;
+    public static function getAll(PDO $pdo): array
+    {
+        $stmt = $pdo->query("
+            SELECT 
+                c.id,
+                c.name,
+                c.faction_id,
+                f.name as faction_name,
+                GROUP_CONCAT(DISTINCT e.id) as equipment_ids,
+                GROUP_CONCAT(DISTINCT e.name) as equipment_names
+            FROM characters c
+            LEFT JOIN factions f ON c.faction_id = f.id
+            LEFT JOIN character_equipment ce ON c.id = ce.character_id
+            LEFT JOIN equipments e ON ce.equipment_id = e.id
+            GROUP BY c.id
+        ");
+
+        $characters = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $row['equipment_ids'] = $row['equipment_ids'] ? explode(',', $row['equipment_ids']) : [];
+            $row['equipment_names'] = $row['equipment_names'] ? explode(',', $row['equipment_names']) : [];
+            $characters[] = self::fromArray($row, $pdo);
+        }
+
+        return $characters;
+    }
+
+    public static function getById(PDO $pdo, int $id): ?self
+    {
+        $stmt = $pdo->prepare("
+            SELECT 
+                c.id,
+                c.name,
+                c.faction_id,
+                f.name as faction_name,
+                GROUP_CONCAT(DISTINCT e.id) as equipment_ids,
+                GROUP_CONCAT(DISTINCT e.name) as equipment_names
+            FROM characters c
+            LEFT JOIN factions f ON c.faction_id = f.id
+            LEFT JOIN character_equipment ce ON c.id = ce.character_id
+            LEFT JOIN equipments e ON ce.equipment_id = e.id
+            WHERE c.id = ?
+            GROUP BY c.id
+        ");
+        
+        $stmt->execute([$id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            return null;
+        }
+
+        $row['equipment_ids'] = $row['equipment_ids'] ? explode(',', $row['equipment_ids']) : [];
+        $row['equipment_names'] = $row['equipment_names'] ? explode(',', $row['equipment_names']) : [];
+        
+        return self::fromArray($row, $pdo);
     }
 }

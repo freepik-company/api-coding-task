@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Read;
 
 use App\Model\Character;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use PDO;
 
-class GetCharactersController
+class ReadCharactersController
 {
     private $db;
 
@@ -22,11 +22,16 @@ class GetCharactersController
             $character = new Character($this->db);
             $characters = $character->findAll();
             
+            // Convertir cada objeto Character a array
+            $charactersArray = array_map(function($character) {
+                return $character->toArray();
+            }, $characters);
+            
             $response->getBody()->write(json_encode([
                 'status' => 'success',
                 'code' => 200,
                 'message' => 'Characters retrieved successfully',
-                'data' => $characters
+                'data' => $charactersArray
             ], JSON_PRETTY_PRINT));
             
             return $response
