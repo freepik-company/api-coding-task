@@ -80,7 +80,7 @@ class MySQLCharacterRepository implements CharacterRepository
     }
 
     private function update(Character $character) : Character{
-        $sql ='UPDATE characers
+        $sql ='UPDATE characters
             SET name = :name,
                 birth_date = :birth_date,
                 kingdom = :kingdom,

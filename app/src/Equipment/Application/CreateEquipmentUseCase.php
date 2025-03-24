@@ -19,5 +19,10 @@ class CreateEquipmentUseCase
         {
             // Create equipment
             $equipment = new Equipment();
+            $equipment->setName($name);
+            $equipment->setType($type);
+            $equipment->setMadeBy($madeBy);
+
+            return $this->repository->save($equipment);
         }
 }
