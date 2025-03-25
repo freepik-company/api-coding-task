@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Character\Infrastructure;
+namespace App\Character\Infrastructure\Persistence;
 
 use App\Character\Domain\Character;
 use App\Character\Domain\CharacterRepository;
+use App\Character\Infrastructure\MySQLCharacterFactory;
 use PDO;
 
 class MySQLCharacterRepository implements CharacterRepository
@@ -26,27 +27,12 @@ class MySQLCharacterRepository implements CharacterRepository
         return self::fromArray($data, $this->pdo);    
     }
 
-    private function fromArray(array $data): Character{
-        $character = new Character();
-
-        if (isset($data['id'])){
-            $character->setId($data['id']);
-        }
-
-        return $character
-            ->setName($data['name'])
-            ->setBirthDate($data['birth_date'])
-            ->setKingdom($data['kingdom'])
-            ->setEquipmentId($data['equipment_id'])
-            ->setFactionId($data['faction_id']);
-    }
-
     public function findAll(): array{
         $stmt = $this->pdo->query('SELECT * FROM characters');
         $characters = [];
 
         while ($data = $stmt->fetch(PDO::FETCH_ASSOC)){
-            $characters[] = self::fromArray($data);
+            $characters[] = MySQLCharacterFactory::buildFromArray($data);
         }
         
         return $characters;
@@ -108,7 +94,34 @@ class MySQLCharacterRepository implements CharacterRepository
 
         $stmt = $this->pdo->prepare('DELETE FROM characters WHERE id = :id');
         return $stmt-> execute(['id' => $character->getId()]);
-        
     }
 
+    public function findByName(string $name): ?Character
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM characters WHERE name = :name');
+        $stmt->execute(['name' => $name]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$data) {
+            return null;
+        }
+
+        return self::fromArray($data);
+    }
+
+    public function fromArray(array $data): Character{
+        $character = new Character(
+            $data['name'],
+            $data['birth_date'],
+            $data['kingdom'],
+            $data['equipment_id'],
+            $data['faction_id']
+        );
+
+        if (isset($data['id'])){
+            $character->setId($data['id']);
+        }
+
+        return $character;
+    }
 }

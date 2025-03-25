@@ -11,4 +11,6 @@ interface CharacterRepository
     public function save(Character $character): Character;
 
     public function delete(Character $character): bool;
+
+    public function findByName(string $name): ?Character;
 }

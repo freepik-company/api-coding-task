@@ -6,7 +6,7 @@ use App\Character\Application\CreateCharacterUseCase;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class CreateCharactersController{
+class CreateCharacterController{
     public function __construct(private CreateCharacterUseCase $useCase){
         
     }

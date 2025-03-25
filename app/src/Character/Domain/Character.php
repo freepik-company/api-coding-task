@@ -2,19 +2,22 @@
 
 namespace App\Character\Domain;
 
+//use JsonSerializable;
+
 /**
  * Character entity representing a character in the game
  */
 class Character
 {
-    private ?int $id = null;
-    private string $name;
-    private string $birth_date;
-    private string $kingdom;
-    private int $equipment_id;
-    private int $faction_id;
-    
-    public function __construct()
+
+    public function __construct(
+        private string $name,
+        private string $birth_date,
+        private string $kingdom,
+        private int $equipment_id,
+        private int $faction_id,
+        private ?int $id = null
+    )
     {
     }
 
@@ -28,7 +31,6 @@ class Character
     
     /**
      * Set the character ID
-     * @throws \InvalidArgumentException if ID is negative
      */
     public function setId(int $id): self
     {
@@ -49,7 +51,6 @@ class Character
     
     /**
      * Set the character name
-     * @throws \InvalidArgumentException if name is empty
      */
     public function setName(string $name): self
     {
@@ -70,13 +71,9 @@ class Character
     
     /**
      * Set the character birth date
-     * @throws \InvalidArgumentException if date format is invalid
      */
     public function setBirthDate(string $birth_date): self
     {
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $birth_date)) {
-            throw new \InvalidArgumentException('Birth date must be in YYYY-MM-DD format');
-        }
         $this->birth_date = $birth_date;
         return $this;
     }
@@ -91,7 +88,6 @@ class Character
     
     /**
      * Set the character kingdom
-     * @throws \InvalidArgumentException if kingdom is empty
      */
     public function setKingdom(string $kingdom): self
     {
@@ -112,7 +108,6 @@ class Character
     
     /**
      * Set the character equipment ID
-     * @throws \InvalidArgumentException if equipment ID is negative
      */
     public function setEquipmentId(int $equipment_id): self 
     {
@@ -133,7 +128,6 @@ class Character
     
     /**
      * Set the character faction ID
-     * @throws \InvalidArgumentException if faction ID is negative
      */
     public function setFactionId(int $faction_id): self
     {
@@ -144,50 +138,4 @@ class Character
         return $this;
     }
     
-    /**
-     * Create a Character instance from an array of data
-     * @throws \InvalidArgumentException if required data is missing
-     */
-    public function fromArray(array $data): self
-    {
-        $requiredFields = ['name', 'birth_date', 'kingdom', 'equipment_id', 'faction_id'];
-        foreach ($requiredFields as $field) {
-            if (!isset($data[$field])) {
-                throw new \InvalidArgumentException("Missing required field: {$field}");
-            }
-        }
-
-        $character = new self();
-
-        if (isset($data['id'])) {
-            $character->setId($data['id']);
-        }
-
-        return $character
-            ->setName($data['name'])
-            ->setBirthDate($data['birth_date'])
-            ->setKingdom($data['kingdom'])
-            ->setEquipmentId($data['equipment_id'])
-            ->setFactionId($data['faction_id']);
-    }
-    
-    /**
-     * Convert the Character instance to an array
-     */
-    public function toArray(): array
-    {
-        $data = [
-            'name' => $this->name,
-            'birth_date' => $this->birth_date,
-            'kingdom' => $this->kingdom,
-            'equipment_id' => $this->equipment_id,
-            'faction_id' => $this->faction_id,
-        ];
-
-        if ($this->id !== null) {
-            $data['id'] = $this->id;
-        }
-
-        return $data;
-    }
 }
