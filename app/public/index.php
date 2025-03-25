@@ -4,6 +4,10 @@ use App\Character\Application\CreateCharacterUseCase;
 use App\Character\Domain\CharacterRepository;
 use App\Character\Infrastructure\Http\CreateCharactersController;
 use App\Character\Infrastructure\MySQLCharacterRepository;
+use App\Equipment\Application\CreateEquipmentUseCase;
+use App\Equipment\Domain\EquipmentRepository;
+use App\Equipment\Infrastructure\Http\CreateEquipmentController;
+use App\Equipment\Infrastructure\MySQLEquipmentRepository;
 use Psr\Container\ContainerInterface;
 use Slim\Factory\AppFactory;
 
@@ -24,14 +28,24 @@ $containerBuilder->addDefinitions([
             $c->get(CharacterRepository::class)
         );
     },
+    // Define the EquipmentRepository
+    EquipmentRepository::class => function (ContainerInterface $c){
+        return new MySQLEquipmentRepository($c->get(PDO::class));
+    },
+    CreateEquipmentUseCase::class => function (ContainerInterface $c){
+        return new CreateEquipmentUseCase(
+            $c->get(EquipmentRepository::class)
+        );
+    },
 ]);
 
 $container = $containerBuilder->build();
 
 $app = AppFactory::createFromContainer($container);
 
+// Add routes
 $app->post('/characters', CreateCharactersController::class);
-
+$app->post('/equipments', CreateEquipmentController::class);
 $app->run();
 
 // Configure database connection

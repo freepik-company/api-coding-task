@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Equipment\Infraestructure\Http;
+namespace App\Equipment\Infrastructure\Http;
 
 use App\Equipment\Application\CreateEquipmentUseCase;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -26,13 +26,24 @@ class CreateEquipmentController{
 
         try{
             $character = $this->useCase->execute(
-                $data['naem'],
+                $data['name'],
                 $data['type'],
                 $data['made_by']
             );
 
             //Return success response
-            $response->getBody()
+            $response->getBody()->write(json_encode([
+                'id'=> $character->getId(),
+                'message' => 'Equipment created successfully'
+            ]));
+
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
+        } catch (\Exception $e){
+            $response->getBody()->write(json_encode([
+                'error' => $e->getMessage()
+            ]));
+
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
         }
     }
     

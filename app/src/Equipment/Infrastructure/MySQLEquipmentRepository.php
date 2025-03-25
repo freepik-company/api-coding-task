@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Equipment\Infraestructure;
+namespace App\Equipment\Infrastructure;
 
 use App\Equipment\Domain\Equipment;
 use App\Equipment\Domain\EquipmentRepository;
@@ -49,7 +49,7 @@ class MySQLEquipmentRepository implements EquipmentRepository
     }
 
     public function save(Equipment $equipment):Equipment{
-        if (isset($equipment->getId())){
+        if (!empty($equipment->getId())){
             return $this->update($equipment);
         }
 
