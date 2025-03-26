@@ -43,7 +43,7 @@ help: ## Listar comandos disponibles en este Makefile
 
 
 # BUILD COMMANDS -------------------------------------------------------------------------------------------------------
-build: build-container composer-install ## Construye las dependencias del proyecto
+build: build-container composer-install dot-env ## Construye las dependencias del proyecto
 
 build-container: ## Construye el contenedor de la aplicación
 	docker build --no-cache --target development -t $(IMAGE_NAME):$(IMAGE_TAG_DEV) .
@@ -59,3 +59,11 @@ composer-require: ## Añade nuevas dependencias de producción
 
 composer-require-dev: ## Añade nuevas dependencias de desarrollo
 	docker run --rm -ti -v ${PWD}/app:/app -w /app $(IMAGE_NAME):$(IMAGE_TAG_DEV) composer require --dev --verbose
+
+dot-env: ## Copia el archivo .env.dist a .env
+	@if [ ! -f app/.env ]; then \
+		cp app/.env.dist app/.env; \
+		echo "Archivo .env creado con éxito"; \
+	else \
+		echo "Archivo .env ya existe"; \
+	fi

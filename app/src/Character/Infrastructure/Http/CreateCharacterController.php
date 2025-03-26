@@ -13,9 +13,8 @@ class CreateCharacterController{
 
     public function __invoke(Request $request, Response $response, array $args): Response{
         $data = $request->getParsedBody();
-        $data = json_decode(file_get_contents('php://input'), true);
 
-        // Validate required fields
+        // Validar campos requeridos
         $requiredFields = ['name', 'birth_date', 'kingdom', 'equipment_id', 'faction_id'];
         foreach ($requiredFields as $field){
             if (!isset($data[$field])){

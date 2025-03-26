@@ -2,7 +2,7 @@
 
 namespace App\Character\Domain;
 
-//use JsonSerializable;
+use App\Character\Domain\Exception\CharacterValidationException;
 
 /**
  * Character entity representing a character in the game
@@ -19,87 +19,79 @@ class Character
         private ?int $id = null
     )
     {
+        //Validar los datos
+        $this->validateName();
+        $this->validateBirthDate();
+        $this->validateKingdom();
+        $this->validateEquipmentId();
+        $this->validateFactionId();
     }
 
-    /**
-     * Get the character ID
-     */
+    private function validateName(): void
+    {
+        if(empty($this->name)){
+            throw CharacterValidationException::nameRequired();
+        }
+    }
+
+    private function validateBirthDate(): void
+    {
+        if(empty($this->birth_date)){
+            throw CharacterValidationException::birthDateRequired();
+        }
+        if(preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->birth_date)){
+            throw CharacterValidationException::birthDateInvalidFormat();
+        }
+    }
+
+    private function validateKingdom(): void
+    {
+        if(empty($this->kingdom)){
+            throw CharacterValidationException::kingdomRequired();
+        }
+    }
+
+    private function validateEquipmentId(): void
+    {
+        if(empty($this->equipment_id)){
+            throw CharacterValidationException::equipmentIdRequired();
+        }
+    }
+
+    private function validateFactionId(): void  
+    {
+        if(empty($this->faction_id)){
+            throw CharacterValidationException::factionIdRequired();
+        }
+    }   
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-    
-    /**
-     * Set the character ID
-     */
-    public function setId(int $id): self
-    {
-        if ($id < 0) {
-            throw new \InvalidArgumentException('ID cannot be negative');
-        }
-        $this->id = $id;
-        return $this;
-    }
-    
-    /**
-     * Get the character name
-     */
+    }   
+
     public function getName(): string
     {
         return $this->name;
-    }
-    
-    /**
-     * Set the character name
-     */
-    public function setName(string $name): self
-    {
-        if (empty(trim($name))) {
-            throw new \InvalidArgumentException('Name cannot be empty');
-        }
-        $this->name = $name;
-        return $this;
-    }
-    
-    /**
-     * Get the character birth date
-     */
+    }   
+
     public function getBirthDate(): string
     {
         return $this->birth_date;
-    }
-    
-    /**
-     * Set the character birth date
-     */
-    public function setBirthDate(string $birth_date): self
-    {
-        $this->birth_date = $birth_date;
-        return $this;
-    }
-    
-    /**
-     * Get the character kingdom
-     */
+    }   
+
     public function getKingdom(): string
     {
         return $this->kingdom;
-    }
-    
-    /**
-     * Get the character equipment ID
-     */
+    }      
+
     public function getEquipmentId(): int
     {
         return $this->equipment_id;
-    }
-    
-    /**
-     * Get the character faction ID
-     */
-    public function getFactionId(): int 
+    }   
+
+    public function getFactionId(): int
     {
         return $this->faction_id;
-    }
-        
+    }      
 }

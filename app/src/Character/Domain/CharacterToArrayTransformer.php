@@ -4,11 +4,12 @@ namespace App\Character\Domain;
 
 use App\Character\Domain\Character;
 
-class MySQLCharacterToArrayTransformer{
+class CharacterToArrayTransformer{
 
     public static function transform(Character $character): array
     {
-        $data = [
+        return [
+            'id' => $character->getId(),
             'name' => $character->getName(),
             'birth-date' => $character->getBirthDate(),
             'kingdom' => $character->getKingdom(),
@@ -16,11 +17,6 @@ class MySQLCharacterToArrayTransformer{
             'faction-id' => $character->getFactionId()
         ];
 
-        if(null !== $character->getId()){
-            $data['id'] = $character->getId();
-        }
-
-        return $data;
     }
     
 }

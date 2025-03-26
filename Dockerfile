@@ -4,13 +4,16 @@ RUN apk --update add \
     alpine-sdk \
     linux-headers \
     openssl-dev \
-    redis\
     php8-pear \
     php8-dev
 
 RUN docker-php-ext-install pdo_mysql
 
 RUN rm -rf /var/cache/apk/*
+
+RUN pecl install redis
+
+RUN docker-php-ext-enable redis
 
 EXPOSE 9000
 
