@@ -4,6 +4,7 @@ RUN apk --update add \
     alpine-sdk \
     linux-headers \
     openssl-dev \
+    redis\
     php8-pear \
     php8-dev
 

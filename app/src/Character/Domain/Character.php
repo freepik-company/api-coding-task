@@ -87,35 +87,11 @@ class Character
     }
     
     /**
-     * Set the character kingdom
-     */
-    public function setKingdom(string $kingdom): self
-    {
-        if (empty(trim($kingdom))) {
-            throw new \InvalidArgumentException('Kingdom cannot be empty');
-        }
-        $this->kingdom = $kingdom;
-        return $this;
-    }
-    
-    /**
      * Get the character equipment ID
      */
     public function getEquipmentId(): int
     {
         return $this->equipment_id;
-    }
-    
-    /**
-     * Set the character equipment ID
-     */
-    public function setEquipmentId(int $equipment_id): self 
-    {
-        if ($equipment_id < 0) {
-            throw new \InvalidArgumentException('Equipment ID cannot be negative');
-        }
-        $this->equipment_id = $equipment_id;
-        return $this;
     }
     
     /**
@@ -125,17 +101,5 @@ class Character
     {
         return $this->faction_id;
     }
-    
-    /**
-     * Set the character faction ID
-     */
-    public function setFactionId(int $faction_id): self
-    {
-        if ($faction_id < 0) {
-            throw new \InvalidArgumentException('Faction ID cannot be negative');
-        }
-        $this->faction_id = $faction_id;
-        return $this;
-    }
-    
+        
 }

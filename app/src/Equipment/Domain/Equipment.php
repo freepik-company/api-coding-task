@@ -5,14 +5,22 @@ namespace App\Equipment\Domain;
 class Equipment
 {
     // Properties
-    private ?int $id = null;
     private string $name;
     private string $type;
     private string $made_by;
+    private ?int $id = null;
 
     // Constructor
-    public function __construct()
-    {
+    public function __construct(
+        string $name,
+        string $type,
+        string $made_by,
+        ?int $id = null
+    ) {
+        $this->name = $name;
+        $this->type = $type;
+        $this->made_by = $made_by;
+        $this->id = $id;
     }
 
 
@@ -60,28 +68,7 @@ class Equipment
         $this->made_by = $made_by;
         return $this;
     }      
-
-    public function fromArray(array $data): self
-    {
-        $requiredFields = ['name', 'type', 'made_by'];
-        foreach ($requiredFields as $field){
-            if (!isset($data[$field])){
-                throw new \InvalidArgumentException("Missing required field: {$field}");
-            }
-        }
-
-        $equipment = new self();
-
-        if (isset($data['id'])){
-            $equipment->setId($data['id']);
-        }
-
-        return $equipment
-            ->setName($data['name'])
-            ->setType($data['type'])
-            ->setMadeBy($data['made_by']);
-    }
-    
+      
     public function toArray(): array
     {
         $data = [

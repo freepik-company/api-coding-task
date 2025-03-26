@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Equipment\Infrastructure;
+namespace App\Equipment\Infrastructure\Persistance\Pdo;
 
 use App\Equipment\Domain\Equipment;
 use App\Equipment\Domain\EquipmentRepository;
