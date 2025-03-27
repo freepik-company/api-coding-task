@@ -39,7 +39,7 @@ class Character
         if(empty($this->birth_date)){
             throw CharacterValidationException::birthDateRequired();
         }
-        if(preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->birth_date)){
+        if(!preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->birth_date)){
             throw CharacterValidationException::birthDateInvalidFormat();
         }
     }

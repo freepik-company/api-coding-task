@@ -14,6 +14,8 @@ class CreateCharacterController{
     public function __invoke(Request $request, Response $response, array $args): Response{
         $data = $request->getParsedBody();
 
+// Parsear el body a json $data = json_decode(file_get_contents('php://input'), true); Alternativa a BodyParsingMiddleware
+
         // Validar campos requeridos
         $requiredFields = ['name', 'birth_date', 'kingdom', 'equipment_id', 'faction_id'];
         foreach ($requiredFields as $field){

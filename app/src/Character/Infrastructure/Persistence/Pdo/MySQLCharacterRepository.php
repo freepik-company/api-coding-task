@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Character\Infrastructure\Persistence;
+namespace App\Character\Infrastructure\Persistence\Pdo;
 
 use App\Character\Domain\Character;
 use App\Character\Domain\CharacterRepository;
-use App\Character\Infrastructure\MySQLCharacterFactory;
+use App\Character\Infrastructure\Persistence\Pdo\MySQLCharacterToArrayTransformer;
+use App\Character\Infrastructure\Persistence\Pdo\Exception\CharacterNotFoundException;
+use App\Shared\Infrastructure\Pdo\Exception\RowInsertionFailedException as ExceptionRowInsertionFailedException;
 use PDO;
 
 class MySQLCharacterRepository implements CharacterRepository
@@ -18,13 +20,13 @@ class MySQLCharacterRepository implements CharacterRepository
     public function find(int $id): ?Character{
         $stmt = $this->pdo->prepare('SELECT * FROM characters WHERE id = :id');
         $stmt->execute(['id' => $id]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data = $stmt->fetch();
 
         if (!$data) {
-            return null;
+            throw CharacterNotFoundException::build();
         }
 
-        return self::fromArray($data, $this->pdo);    
+        return MySQLCharacterFactory::buildFromArray($data);   
     }
 
     public function findAll(): array{
@@ -50,19 +52,20 @@ class MySQLCharacterRepository implements CharacterRepository
         $sql = 'INSERT INTO characters (name, birth_date, kingdom, equipment_id, faction_id) VALUES (:name, :birth_date, :kingdom, :equipment_id, :faction_id)';
 
         $stmt = $this->pdo->prepare($sql);
-        $result = $stmt->execute([
-            'name' =>           $character->getName(),
-            'birth_date' =>     $character->getBirthDate(),
-            'kingdom' =>        $character->getKingdom(),
-            'equipment_id'=>    $character->getEquipmentId(),
-            'faction_id' =>     $character->getFactionId(),
-            ]);
+        $result = $stmt->execute(MySQLCharacterToArrayTransformer::transform($character));
 
-            if (!$result){
-            $character->setId($this->pdo->lastInsertId());
-            }
+        if (!$result){
+            throw ExceptionRowInsertionFailedException::build();
+        }
 
-            return $character;  
+        return MySQLCharacterFactory::buildFromArray([
+            'name' => $character->getName(),
+            'birth_date' => $character->getBirthDate(),
+            'kingdom' => $character->getKingdom(),
+            'equipment_id' => $character->getEquipmentId(),
+            'faction_id' => $character->getFactionId(),
+            'id' => $this->pdo->lastInsertId()
+        ]);
     }
 
     private function update(Character $character) : Character{
@@ -95,33 +98,5 @@ class MySQLCharacterRepository implements CharacterRepository
         $stmt = $this->pdo->prepare('DELETE FROM characters WHERE id = :id');
         return $stmt-> execute(['id' => $character->getId()]);
     }
-
-    public function findByName(string $name): ?Character
-    {
-        $stmt = $this->pdo->prepare('SELECT * FROM characters WHERE name = :name');
-        $stmt->execute(['name' => $name]);
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$data) {
-            return null;
-        }
-
-        return self::fromArray($data);
-    }
-
-    public function fromArray(array $data): Character{
-        $character = new Character(
-            $data['name'],
-            $data['birth_date'],
-            $data['kingdom'],
-            $data['equipment_id'],
-            $data['faction_id']
-        );
-
-        if (isset($data['id'])){
-            $character->setId($data['id']);
-        }
-
-        return $character;
-    }
+        
 }

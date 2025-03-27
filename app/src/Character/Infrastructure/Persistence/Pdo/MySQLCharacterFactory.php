@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Character\Infrastructure;
+namespace App\Character\Infrastructure\Persistence\Pdo;
 
 use App\Character\Domain\Character;
 use App\Character\Domain\CharacterFactory;
 
-class MySQLCharacterFactory{
-    
-
+class MySQLCharacterFactory
+{
     public static function buildFromArray(array $data): Character
     {
         return CharacterFactory::build(

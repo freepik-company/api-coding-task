@@ -4,36 +4,42 @@ namespace App\Character\Infrastructure\Persistence\Cache;
 
 use App\Character\Domain\Character;
 use App\Character\Domain\CharacterRepository;
-use App\Character\Infrastructure\Persistence\MySQLCharacterRepository;
+use App\Character\Infrastructure\Persistence\Pdo\MySQLCharacterRepository;
 use Psr\Log\LoggerInterface;
 use Redis;
 
-class CachedMySQLCharacterReposistory implements CharacterRepository
+class CachedMySQLCharacterRepository implements CharacterRepository
 {
     public function __construct(
         private MySQLCharacterRepository $mySQLCharacterRepository,
         private Redis $redis,
         private ?LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     public function find(int $id): ?Character
     {
-        $cachedCharacter = $this->redis->get($id);
+        $cachedCharacter = $this->redis->get($this->getKey($id));
         if ($cachedCharacter) {
-            $this->logger->info("Character foun in cache", ['id' => $id]);
+            $this->logger->info('Character found in cache', ['id' => $id]);
 
             return unserialize($cachedCharacter);
         }
 
         $character = $this->mySQLCharacterRepository->find($id);
-        $this->redis->set($id, serialize($character));
+        $this->redis->set($this->getKey($id), serialize($character));
 
         return $character;
     }
 
+    private function getKey(string $key): string
+    {
+        return __CLASS__ . ':' . $key;
+    }
+
     public function findAll(): array
     {
-        $cachedCharacters = $this->redis->get('all');
+        $cachedCharacters = $this->redis->get($this->getKey('all'));
         if ($cachedCharacters) {
             $this->logger->info('Getting all characters from cache');
 
@@ -41,7 +47,7 @@ class CachedMySQLCharacterReposistory implements CharacterRepository
         }
 
         $characters = $this->mySQLCharacterRepository->findAll();
-        $this->redis->set('all', serialize($characters));
+        $this->redis->set($this->getKey('all'), serialize($characters));
 
         return $characters;
     }
@@ -50,7 +56,7 @@ class CachedMySQLCharacterReposistory implements CharacterRepository
     {
         $savedCharacter = $this->mySQLCharacterRepository->save($character);
 
-        $this->redis->set($savedCharacter->getId(), serialize($savedCharacter));
+        $this->redis->set($this->getKey($savedCharacter->getId()), serialize($savedCharacter));
 
         return $savedCharacter;
     }
@@ -58,24 +64,8 @@ class CachedMySQLCharacterReposistory implements CharacterRepository
     public function delete(Character $character): bool
     {
         $this->mySQLCharacterRepository->delete($character);
-        $this->redis->del($character->getId());
+        $this->redis->del($this->getKey($character->getId()));
 
         return true;
     }
-
-    public function findByName(string $name): ?Character
-    {
-        $cachedCharacter = $this->redis->get($name);
-        if ($cachedCharacter) {
-            $this->logger->info("Character found in cache", ['name' => $name]);
-            
-            return unserialize($cachedCharacter);
-        }
-
-        $character = $this->mySQLCharacterRepository->findByName($name);
-        $this->redis->set($name, serialize($character));
-        
-        return $character;
-    }
-
 }

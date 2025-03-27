@@ -2,8 +2,8 @@
 
 namespace App\Character\Infrastructure\Persistence\Pdo\Exception;
 
-class RowInsertionFailedException extends \Exception{
-    private const MESSAGE = 'Failed to insert row';
+class CharacterNotFoundException extends \Exception{
+    private const MESSAGE = 'Character not found';
 
     public static function build(): self
     {
