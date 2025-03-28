@@ -8,7 +8,7 @@ use App\Character\Domain\CharacterToArrayTransformer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class ListCharactersController
+class ReadAllCharactersController
 {
     public function __construct(
         private ReadAllCharactersUseCase $useCase

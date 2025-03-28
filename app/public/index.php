@@ -4,10 +4,13 @@ use App\Character\Application\CreateCharacterUseCase;
 use App\Character\Application\DeleteCharacterUseCase;
 use App\Character\Application\ReadAllCharactersUseCase;
 use App\Character\Application\ReadCharacterUseCase;
+use App\Character\Application\UpdateCharacterUseCase;
 use App\Character\Domain\CharacterRepository;
 use App\Character\Infrastructure\Http\CreateCharacterController;
-use App\Character\Infrastructure\Http\ListCharactersController;
+use App\Character\Infrastructure\Http\DeleteCharacterController;
+use App\Character\Infrastructure\Http\ReadAllCharactersController;
 use App\Character\Infrastructure\Http\ReadCharacterController;
+use App\Character\Infrastructure\Http\UpdateCharacterController;
 use App\Character\Infrastructure\Persistence\Cache\CachedMySQLCharacterRepository;
 use App\Character\Infrastructure\Persistence\Pdo\MySQLCharacterRepository;
 use App\Equipment\Application\CreateEquipmentUseCase;
@@ -105,6 +108,13 @@ $containerBuilder->addDefinitions([
             $c->get(CharacterRepository::class)
         );
     },
+    // Update a character by id
+    UpdateCharacterUseCase::class => function (ContainerInterface $c) {
+        return new UpdateCharacterUseCase(
+            $c->get(CharacterRepository::class)
+        );
+    },
+
 
     // Define the EquipmentRepository
     EquipmentRepository::class => function (ContainerInterface $c) {
@@ -129,14 +139,15 @@ $container = $containerBuilder->build();
 
 $app = AppFactory::createFromContainer($container);
 
-// Add middleware
+// Add middleware to parse the body of the request as JSON
 $app->add(new BodyParsingMiddleware());
 
 // Add routes for the character resource
 $app->post('/character', CreateCharacterController::class);
-$app->get('/characters', ListCharactersController::class);
+$app->get('/characters', ReadAllCharactersController::class);
 $app->get('/character/{id}', ReadCharacterController::class);
 $app->delete('/character/{id}', DeleteCharacterController::class);
+$app->put('/character/{id}', UpdateCharacterController::class);
 
 // Add routes for the equipment resource
 $app->post('/equipments', CreateEquipmentController::class);

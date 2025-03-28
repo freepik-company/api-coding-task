@@ -79,21 +79,34 @@ class CachedMySQLCharacterRepository implements CharacterRepository
     }
 
     /**
-     * This method saves a character.
-     * It first saves the character in the MySQL database.
+     * This method saves and updates a character.
+     * It first checks if the character is already in the MySQL database.
+     * If it is, it updates the character.
+     * If it is not, it saves the character.
      * Then it caches the character in Redis.
      */
     public function save(Character $character): Character
     {
-        $savedCharacter = $this->mySQLCharacterRepository->save($character);
-        
-        $this->redis->set($this->getKey($savedCharacter->getId()), serialize($savedCharacter));
-        if ($savedCharacter) {
-            $this->logger->info('Character saved in cache');
+        if ($character->getId() !== null){
+            //Update
+            $updatedCharacter = $this->mySQLCharacterRepository->update($character);
+            $this->redis->set($this->getKey($updatedCharacter->getId()), serialize($updatedCharacter));
+            $this->redis->del($this->getKey('all'));
+            if ($updatedCharacter) {
+                $this->logger->info('Character updated in cache');
+            }
+            return $updatedCharacter;
         }
-        
-        return $savedCharacter;
+            // Insert
+            $newCharacter = $this->mySQLCharacterRepository->save($character);
+            $this->redis->set($this->getKey($newCharacter->getId()), serialize($newCharacter));
+            $this->redis->del($this->getKey('all'));
+            if ($newCharacter) {
+                $this->logger->info('Character saved in cache');
+            }
+            return $newCharacter;
     }
+
 
     /**
      * This method deletes a character.

@@ -41,7 +41,7 @@ class MySQLCharacterRepository implements CharacterRepository
     }
 
     public function save(Character $character): Character{
-        if (isset($this->id)){
+        if ($character->getId() !== null){
             return $this->update($character);
         }
 
@@ -68,7 +68,7 @@ class MySQLCharacterRepository implements CharacterRepository
         ]);
     }
 
-    private function update(Character $character) : Character{
+    public function update(Character $character) : Character{
         $sql ='UPDATE characters
             SET name = :name,
                 birth_date = :birth_date,
