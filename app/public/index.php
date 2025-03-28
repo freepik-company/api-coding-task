@@ -1,6 +1,7 @@
 <?php
 
 use App\Character\Application\CreateCharacterUseCase;
+use App\Character\Application\DeleteCharacterUseCase;
 use App\Character\Application\ReadAllCharactersUseCase;
 use App\Character\Application\ReadCharacterUseCase;
 use App\Character\Domain\CharacterRepository;
@@ -69,7 +70,7 @@ $containerBuilder->addDefinitions([
 
         return new NullLogger();
     },
-
+    //Define the CharacterRepository.
     CharacterRepository::class => function (ContainerInterface $c) {
         if ((bool) ((int) $_ENV['CACHE_ENABLED'])) {
             return new CachedMySQLCharacterRepository(
@@ -80,6 +81,7 @@ $containerBuilder->addDefinitions([
         }
         return new MySQLCharacterRepository($c->get(PDO::class));
     },
+    //Create a character
     CreateCharacterUseCase::class => function (ContainerInterface $c) {
         return new CreateCharacterUseCase(
             $c->get(CharacterRepository::class)
@@ -97,6 +99,13 @@ $containerBuilder->addDefinitions([
             $c->get(CharacterRepository::class)
         );
     },
+    // Delete a character by id
+    DeleteCharacterUseCase::class => function (ContainerInterface $c) {
+        return new DeleteCharacterUseCase(
+            $c->get(CharacterRepository::class)
+        );
+    },
+
     // Define the EquipmentRepository
     EquipmentRepository::class => function (ContainerInterface $c) {
         if ((bool) ((int) $_ENV['CACHE_ENABLED'])) {
@@ -123,9 +132,12 @@ $app = AppFactory::createFromContainer($container);
 // Add middleware
 $app->add(new BodyParsingMiddleware());
 
-// Add routes
-$app->post('/characters', CreateCharacterController::class);
+// Add routes for the character resource
+$app->post('/character', CreateCharacterController::class);
 $app->get('/characters', ListCharactersController::class);
 $app->get('/character/{id}', ReadCharacterController::class);
+$app->delete('/character/{id}', DeleteCharacterController::class);
+
+// Add routes for the equipment resource
 $app->post('/equipments', CreateEquipmentController::class);
 $app->run();
