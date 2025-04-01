@@ -2,7 +2,7 @@
 
 namespace App\Character\Application;
 
-use App\Character\Domain\Character;
+use App\Character\Domain\CharacterFactory;
 use App\Character\Domain\CharacterRepository;
 
 class CreateCharacterUseCase
@@ -13,24 +13,18 @@ class CreateCharacterUseCase
     }
 
     public function execute(
-        string $name,
-        string $birthDate,
-        string $kingdom,
-        int $equipmentId,
-        int $factionId
-    ): Character
+        CreateCharacterUseCaseRequest $request
+    ): CreateCharacterUseCaseResponse
     {   
-        // Create character
-        $character = new Character(
-            $name,
-            $birthDate,
-            $kingdom,
-            $equipmentId,
-            $factionId
+        $character = CharacterFactory::build(
+            $request->getName(),
+            $request->getBirthDate(),
+            $request->getKingdom(),
+            $request->getEquipmentId(),
+            $request->getFactionId()
         );
+        $this->repository->save($character);
 
-
-
-        return $this->repository->save($character);
+        return new CreateCharacterUseCaseResponse($character);
     }
 }

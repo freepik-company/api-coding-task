@@ -142,6 +142,9 @@ $app = AppFactory::createFromContainer($container);
 // Add middleware to parse the body of the request as JSON
 $app->add(new BodyParsingMiddleware());
 
+// Add error handling middleware
+$app->add(new \App\Shared\Infrastructure\Exception\Http\ErrorHandlerMiddleware());
+
 // Add routes for the character resource
 $app->post('/character', CreateCharacterController::class);
 $app->get('/characters', ReadAllCharactersController::class);

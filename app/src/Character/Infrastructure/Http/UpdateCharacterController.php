@@ -26,16 +26,16 @@ class UpdateCharacterController
         }
 
         try {
-
-
-            $character = $this->updateCharacterUseCase->execute(
-                $data['name'],
-                $data['birth_date'],
-                $data['kingdom'],
-                $data['equipment_id'],
-                $data['faction_id'],
-                $args['id']
+            $request = new \App\Character\Application\UpdateCharacterUseCaseRequest(
+                id: $args['id'],
+                name: $data['name'],
+                birthDate: $data['birth_date'],
+                kingdom: $data['kingdom'],
+                equipmentId: $data['equipment_id'],
+                factionId: $data['faction_id']
             );
+
+            $character = $this->updateCharacterUseCase->execute($request);
 
             $response->getBody()->write(json_encode([
                 'id' => $character->getId(),

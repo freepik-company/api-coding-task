@@ -27,7 +27,9 @@
     }
   },
   "require-dev": {
-    "symfony/var-dumper": "^6.0"
+    "symfony/var-dumper": "^6.0",
+    "phpunit/phpunit": "^10.0",
+    "fakerphp/fakerphp": "^1.23"
   },
   "config": {
     "allow-plugins": true

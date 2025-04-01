@@ -25,7 +25,7 @@ class ReadCharacterController
                 'character' => CharacterToArrayTransformer::transform($character)
             ]));
 
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
         } catch (\Exception $e) {
             $response->getBody()->write(json_encode([
                 'error' => 'Failed to read character',

@@ -67,3 +67,15 @@ dot-env: ## Copia el archivo .env.dist a .env
 	else \
 		echo "Archivo .env ya existe"; \
 	fi
+
+test: ## Ejecuta los test
+	docker compose exec php vendor/bin/phpunit --colors=always tests
+
+test-unit : ## Ejecuta los test unitarios
+	docker compose exec php vendor/bin/phpunit --colors=always test --group unit
+
+test-group: ## Ejecuta los test de un grupo
+	docker compose exec php vendor/bin/phpunit --colors=always test --group $*
+
+test-coverage: ## Ejecuta los test y genera el coverage
+	docker compose exec php vendor/bin/phpunit --colors=always test --coverage-html test/coverage

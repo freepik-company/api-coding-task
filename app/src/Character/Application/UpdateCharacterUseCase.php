@@ -18,31 +18,21 @@ class UpdateCharacterUseCase
     }
 
     public function execute(
-        string $name,
-        string $birthDate,
-        string $kingdom,
-        int $equipmentId,
-        int $factionId,
-        int $id
+        UpdateCharacterUseCaseRequest $request
     ): Character
     {
-        $oldcharacter = $this->repository->find($id);
-
-
-/* How I'm using semantics constructor I can't use the update method
-I need to create a new character with the new values
-*/
+        $oldcharacter = $this->repository->find($request->getId());
 
         if (!$oldcharacter) {
             throw new \Exception('Character not found');
         }
 
         $updatedcharacter = new Character(
-            name: $name,
-            birth_date: $birthDate,
-            kingdom: $kingdom,
-            equipment_id: $equipmentId,
-            faction_id: $factionId,
+            name: $request->getName(),
+            birth_date: $request->getBirthDate(),
+            kingdom: $request->getKingdom(),
+            equipment_id: $request->getEquipmentId(),
+            faction_id: $request->getFactionId(),
             id: $oldcharacter->getId()
         );
 

@@ -97,7 +97,7 @@ class CachedMySQLCharacterRepository implements CharacterRepository
             }
             return $updatedCharacter;
         }
-            // Insert
+            // Insert ¿CALENTAR CACHE?
             $newCharacter = $this->mySQLCharacterRepository->save($character);
             $this->redis->set($this->getKey($newCharacter->getId()), serialize($newCharacter));
             $this->redis->del($this->getKey('all'));

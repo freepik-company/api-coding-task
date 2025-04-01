@@ -3,8 +3,10 @@
 namespace App\Character\Infrastructure\Http;
 
 use App\Character\Application\CreateCharacterUseCase;
+use App\Character\Domain\CharacterToArrayTransformer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use App\Character\Application\CreateCharacterUseCaseRequest;
 
 class CreateCharacterController{
     public function __construct(private CreateCharacterUseCase $useCase){
@@ -26,24 +28,27 @@ class CreateCharacterController{
         }
 
         try{
-            $character = $this->useCase->execute(
-                $data['name'],
-                $data['birth_date'],
-                $data['kingdom'],
-                $data['equipment_id'],
-                $data['faction_id']
+            $useCaseResponse = $this->useCase->execute(
+                new CreateCharacterUseCaseRequest(
+                    $data['name'],
+                    $data['birth_date'],
+                    $data['kingdom'],
+                    $data['equipment_id'],
+                    $data['faction_id']
+                )
             );
 
             // Return success response
             $response->getBody()->write(json_encode([
-                'id'=> $character->getId(),
+                'character'=> CharacterToArrayTransformer::transform($useCaseResponse->getCharacter()),
                 'message' => 'Character created successfully'
             ]));
 
             return $response->withHeader('content-Type', 'application/json')->withStatus(201);
             } catch (\Exception $e){
                 $response->getBody()->write(json_encode([
-                    'error' => $e->getMessage()
+                    'error' => 'Error creating character',
+                    'message' => $e->getMessage()
                 ]));
 
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
