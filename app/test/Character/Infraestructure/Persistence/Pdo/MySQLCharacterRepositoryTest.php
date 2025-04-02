@@ -7,36 +7,48 @@ use App\Character\Infrastructure\Persistence\Pdo\MySQLCharacterRepository;
 use PHPUnit\Framework\TestCase;
 use PDO;
 
-class MySQLCharacterRepositoryTest extends TestCase{
+class MySQLCharacterRepositoryTest extends TestCase
+{
 
 
-/**
- * @test
- * @group integration
- */
+    /**
+     * This test is an integration test because it connects to the database
+     * and it is a good example of how to use the repository pattern
+     * @test
+     * @group integration
+     */
 
- public function givenARepositoryWithOneCharacterIdWhenReadCharacterThenReturnTheCharacter() {
-    $repository = new MySQLCharacterRepository(
-    $this->createPdoConnection()
-        
- );
+    public function givenARepositoryWithOneCharacterIdWhenReadCharacterThenReturnTheCharacter()
+    {
+        // Arrange create a new repository with a PDO connection
+        $repository = new MySQLCharacterRepository(
+            $this->createPdoConnection()
 
-$character = new Character(
-    'John Doe',
-    '1990-01-01',
-    'Kingdom of Doe',
-    1,
-        1
-);
+        );
 
-$character = $repository->save($character);
+        // Create a new character
+        $character = new Character(
+            'John Doe',
+            '1990-01-01',
+            'Kingdom of Doe',
+            1,
+            1
+        );
 
-$character = $repository->find($character->getId());
+        $character = $repository->save($character);
 
-$this->assertEquals('John Doe', $character->getName());
-$this->assertEquals('1990-01-01', $character->getBirthDate());
-$this->assertEquals('Kingdom of Doe', $character->getKingdom());
-$this->assertEquals('1', $character->getEquipmentId());
-$this->assertEquals('1', $character->getFactionId());
- }
+        $character = $repository->find($character->getId());
+
+        $this->assertEquals('John Doe', $character->getName());
+        $this->assertEquals('1990-01-01', $character->getBirthDate());
+        $this->assertEquals('Kingdom of Doe', $character->getKingdom());
+        $this->assertEquals(1, $character->getEquipmentId());
+        $this->assertEquals(1, $character->getFactionId());
+    }
+
+    // This is a helper method to create a PDO connection
+    private function createPdoConnection(): PDO
+    {
+        return new PDO('mysql:host=db;dbname=test', 'root', 'root');
+    }
 }

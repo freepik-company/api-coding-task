@@ -5,7 +5,7 @@ namespace App\Test\Character\Application;
 use App\Character\Application\ReadCharacterUseCase;
 use App\Character\Domain\Character;
 use App\Character\Domain\CharacterRepository;
-use App\Character\Infrastructure\Persistence\InMemory\ArrayCharacerRepository;
+use App\Character\Infrastructure\Persistence\InMemory\ArrayCharacterRepository;
 use App\Character\Infrastructure\Persistence\Pdo\Exception\CharacterNotFoundException;
 use PHPUnit\Framework\TestCase;
 
@@ -15,6 +15,7 @@ class ReadCharacterUseCaseTest extends TestCase{
       * @test
       * @group happy-path
       * @group unit
+      * @group readCharacter
       */
     public function givenARepositoryWithOneCharacterIdWhenReadCharacterThenReturnCharacter(){
         $sut = new ReadCharacterUseCase(
@@ -36,13 +37,13 @@ class ReadCharacterUseCaseTest extends TestCase{
         $this->assertEquals('John Doe', $character->getName());
         $this->assertEquals('1990-01-01', $character->getBirthDate());
         $this->assertEquals('Kingdom of Doe', $character->getKingdom());
-        $this->assertEquals('1', $character->getEquipmentId());
-        $this->assertEquals('1', $character->getFactionId());
+        $this->assertEquals(1, $character->getEquipmentId());
+        $this->assertEquals(1, $character->getFactionId());
     }
     
 
     private function mockCharacterRepository(array $characters): CharacterRepository{
-        $repository = new ArrayCharacerRepository();
+        $repository = new ArrayCharacterRepository();
         foreach ($characters as $character){
             $repository->save($character);
         }
@@ -53,6 +54,7 @@ class ReadCharacterUseCaseTest extends TestCase{
       * @test
       * @group unhappy-path
       * @group unit
+      * @group readCharacter
       */
       public function givenARepositoryWithNonExistingCharacterIdWhenReadCharacterThenExceptionShouldBeRaised()
       {

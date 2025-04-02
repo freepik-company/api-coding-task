@@ -6,7 +6,7 @@ use App\Character\Domain\Character;
 use App\Character\Domain\CharacterRepository;
 use App\Character\Infrastructure\Persistence\Pdo\Exception\CharacterNotFoundException;
 
-class ArrayCharacerRepository implements CharacterRepository
+class ArrayCharacterRepository implements CharacterRepository
 {
     public function __construct(
         private array $characters = []

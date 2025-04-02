@@ -14,10 +14,12 @@ use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request as SlimRequest;
 use Slim\Psr7\Uri;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
-class ReadControllerTest extends TestCase{
+class ReadCharacterControllerTest extends TestCase{
 /** 
 * @test
+* @group happy-path
 * @group acceptance
 */
     public function givenARepositoryWithOneCharacterIdWhenReadCharacterThenReturnCharacterAsJson(): void{
@@ -64,7 +66,7 @@ class ReadControllerTest extends TestCase{
     }
 
     private function getAppInstance(): App{
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../../');
+        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../../../');
         $dotenv->load();
 
         $containerBuilder = new ContainerBuilder();
