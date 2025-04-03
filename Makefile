@@ -60,6 +60,9 @@ composer-require: ## Añade nuevas dependencias de producción
 composer-require-dev: ## Añade nuevas dependencias de desarrollo
 	docker run --rm -ti -v ${PWD}/app:/app -w /app $(IMAGE_NAME):$(IMAGE_TAG_DEV) composer require --dev --verbose
 
+composer-dump-autoload: ## Genera el autoload de composer
+	docker run --rm -v ${PWD}/app:/app -w /app $(IMAGE_NAME):$(IMAGE_TAG_DEV) composer dump-autoload --verbose
+
 dot-env: ## Copia el archivo .env.dist a .env
 	@if [ ! -f app/.env ]; then \
 		cp app/.env.dist app/.env; \
@@ -69,13 +72,13 @@ dot-env: ## Copia el archivo .env.dist a .env
 	fi
 
 test: ## Ejecuta los test
-	docker compose exec php vendor/bin/phpunit --colors=always test
+	docker compose exec php vendor/bin/phpunit --colors=always test --testdox
 
 test-unit : ## Ejecuta los test unitarios
-	docker compose exec php vendor/bin/phpunit --colors=always test --group unit
+	docker compose exec php vendor/bin/phpunit --colors=always test --testdox --group unit
 
 test-group: ## Ejecuta los test de un grupo
-	docker compose exec php vendor/bin/phpunit --colors=always test --group $(filter-out $@,$(MAKECMDGOALS))
+	docker compose exec php vendor/bin/phpunit --colors=always test --testdox --group $(filter-out $@,$(MAKECMDGOALS))
 
 test-coverage: ## Ejecuta los test y genera el coverage
-	docker compose exec php vendor/bin/phpunit --colors=always test --coverage-html test/coverage
+	docker compose exec php vendor/bin/phpunit --colors=always test --testdox --coverage-html test/coverage

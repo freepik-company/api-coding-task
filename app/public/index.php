@@ -1,7 +1,6 @@
 <?php
 
 use Slim\Factory\AppFactory;
-use Slim\Middleware\BodyParsingMiddleware;
 
 /* Alternativa a BodyParsingMiddleware sería usar: $data->json_decode(file_get_contents('php://input'), true); 
 habria que ponerlo en el controlador*/

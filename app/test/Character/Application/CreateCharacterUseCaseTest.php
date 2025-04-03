@@ -4,58 +4,48 @@ namespace App\Test\Character\Application;
 
 use App\Character\Application\CreateCharacterUseCase;
 use App\Character\Application\CreateCharacterUseCaseRequest;
-use App\Character\Domain\Character;
 use App\Character\Domain\CharacterRepository;
 use App\Character\Domain\Exception\CharacterValidationException;
 use App\Character\Infrastructure\Persistence\InMemory\ArrayCharacterRepository;
+use App\Test\Character\Application\MotherObject\CreateCharacterUseCaseRequestMotherObject;
+use DomainException;
 use PHPUnit\Framework\TestCase;
 
 class CreateCharacterUseCaseTest extends TestCase
 {
-    private CharacterRepository $repository;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->repository = $this->mockCharacterRepository([]);
-    }
-
-    private function mockCharacterRepository(array $characters): CharacterRepository
-    {
-        $repository = new ArrayCharacterRepository();
-        foreach ($characters as $character) {
-            $repository->save($character);
-        }
-        return $repository;
-    }
-
     /**
      * @test
      * @group happy-path
      * @group unit
      * @group createCharacter
+     * @dataProvider invalidDataProvider
      */
-    public function givenAValidCharacterWhenCreateThenReturnCharacter()
+    public function givenARequestWithValidDataWhenCreateCharacterThenReturnSuccess()
     {
-        $sut = new CreateCharacterUseCase($this->repository);
-
-        $request = new CreateCharacterUseCaseRequest(
-            'Pepe',
-            '1990-01-01',
-            'Spain',
-            1,
-            1
+        $request = CreateCharacterUseCaseRequestMotherObject::valid();
+        $sut = new CreateCharacterUseCase(
+            $this->mockCharacterRepository([])
         );
 
-        $response = $sut->execute($request);
-        $character = $response->getCharacter();
+        $result = $sut->execute($request);
 
-        $this->assertNull($character->getId());
-        $this->assertEquals('Pepe', $character->getName());
-        $this->assertEquals('1990-01-01', $character->getBirthDate());
-        $this->assertEquals('Spain', $character->getKingdom());
-        $this->assertEquals(1, $character->getEquipmentId());
-        $this->assertEquals(1, $character->getFactionId());
+        $this->assertEquals(1, $result->getCharacter()->getId());
+        $this->assertEquals('John Doe', $result->getCharacter()->getName());
+        $this->assertEquals('1990-01-01', $result->getCharacter()->getBirthDate());
+        $this->assertEquals('Kingdom of Spain', $result->getCharacter()->getKingdom());
+        $this->assertEquals(1, $result->getCharacter()->getEquipmentId());
+        $this->assertEquals(1, $result->getCharacter()->getFactionId());
+    }
+
+    private function mockCharacterRepository(array $characters): CharacterRepository
+    {
+        $repository = new ArrayCharacterRepository();
+
+        foreach ($characters as $character) {
+            $repository->save($character);
+        }
+
+        return $repository;
     }
 
     /**
@@ -63,24 +53,43 @@ class CreateCharacterUseCaseTest extends TestCase
      * @group unhappy-path
      * @group unit
      * @group createCharacter
+     * @dataProvider invalidDataProvider
      */
-    public function givenAnInvalidCharacterWhenCreateThenExceptionShouldBeThrown()
-    {
-        $sut = new CreateCharacterUseCase($this->repository);
-
-        $this->expectException(CharacterValidationException::class);
-        $this->expectExceptionMessage('Name is required');
-
-        $request = new CreateCharacterUseCaseRequest(
-            '',
-            '1990-01-01',
-            'Spain',
-            1,
-            1
+    public function givenARequestWithInvalidDataWhenCreateCharacterThenReturnError(
+        CreateCharacterUseCaseRequest $request,
+        DomainException $expectedException
+    ) {
+        $sut = new CreateCharacterUseCase(
+            $this->mockCharacterRepository([])
         );
 
+        $this->expectException($expectedException::class);
         $sut->execute($request);
     }
+
+    public static function invalidDataProvider(): array
+    {
+        return [
+            'invalid name' => [
+                CreateCharacterUseCaseRequestMotherObject::withInvalidName(),
+                CharacterValidationException::nameRequired(),
+            ],
+            'invalid birth date' => [
+                CreateCharacterUseCaseRequestMotherObject::withInvalidBirthDate(),
+                CharacterValidationException::birthDateRequired()
+            ],
+            'invalid kingdom' => [
+                CreateCharacterUseCaseRequestMotherObject::withInvalidKingdom(),
+                CharacterValidationException::kingdomRequired()
+            ],
+            'invalid equipment ID' => [
+                CreateCharacterUseCaseRequestMotherObject::withInvalidEquipmentId(),
+                CharacterValidationException::equipmentIdRequired()
+            ],
+            'invalid faction ID' => [
+                CreateCharacterUseCaseRequestMotherObject::withInvalidFactionId(),
+                CharacterValidationException::factionIdRequired()
+            ],
+        ];
+    }
 }
-/* Como es un test unitario, no se puede conectar a la base de datos, por lo que se crea un mock de la clase ArrayCharacterRepository.
-Se conecta a la base de datos en el test de integración.*/

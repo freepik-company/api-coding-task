@@ -9,13 +9,11 @@ class CreateCharacterUseCase
 {
     public function __construct(
         private CharacterRepository $repository,
-    ) {
-    }
+    ) {}
 
     public function execute(
         CreateCharacterUseCaseRequest $request
-    ): CreateCharacterUseCaseResponse
-    {   
+    ): CreateCharacterUseCaseResponse {
         $character = CharacterFactory::build(
             $request->getName(),
             $request->getBirthDate(),
@@ -23,7 +21,9 @@ class CreateCharacterUseCase
             $request->getEquipmentId(),
             $request->getFactionId()
         );
-        $this->repository->save($character);
+
+        // This is the repository pattern, we are saving the character in the database.
+        $character = $this->repository->save($character);
 
         return new CreateCharacterUseCaseResponse($character);
     }

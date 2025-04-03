@@ -3,29 +3,14 @@
 namespace App\Test\Character\Application;
 
 use App\Character\Application\DeleteCharacterUseCase;
-use App\Character\Domain\Character;
 use App\Character\Domain\CharacterRepository;
-use App\Character\Infrastructure\Persistence\Pdo\MySQLCharacterRepository;
+use App\Character\Infrastructure\Persistence\InMemory\ArrayCharacterRepository;
 use App\Character\Infrastructure\Persistence\Pdo\Exception\CharacterNotFoundException;
 use PHPUnit\Framework\TestCase;
-use PDO;
+use App\Character\Domain\CharacterFactory;
 
 class DeleteCharacterUseCaseTest extends TestCase
 {
-    private CharacterRepository $repository;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->repository = new MySQLCharacterRepository(
-            new PDO(
-                'mysql:host=db;dbname=test',
-                'root',
-                'root'
-            )
-        );
-    }
-
     /**
      * @test
      * @group happy-path
@@ -34,12 +19,23 @@ class DeleteCharacterUseCaseTest extends TestCase
      */
     public function givenAValidCharacterWhenDeleteThenReturnTrue()
     {
-        $sut = new DeleteCharacterUseCase($this->repository);
-        $sut->execute(2); // Eliminamos el personaje con ID 2
+        // Primero creamos un personaje
+        $character = CharacterFactory::build(
+            'Test Character',
+            '1990-01-01',
+            'Test Kingdom',
+            1,
+            1,
+            1 // Asignamos un ID explícito
+        );
+        $repository = $this->mockCharacterRepository([$character]);
+
+        $sut = new DeleteCharacterUseCase($repository);
+        $sut->execute($character->getId());
 
         // Verificamos que ya no existe
         $this->expectException(CharacterNotFoundException::class);
-        $this->repository->find(2);
+        $repository->find($character->getId());
     }
 
     /**
@@ -50,11 +46,23 @@ class DeleteCharacterUseCaseTest extends TestCase
      */
     public function givenAnInvalidCharacterWhenDeleteThenExceptionShouldBeThrown()
     {
-        $sut = new DeleteCharacterUseCase($this->repository);
+        $repository = $this->mockCharacterRepository([]);
+        $sut = new DeleteCharacterUseCase($repository);
 
         $this->expectException(CharacterNotFoundException::class);
         $this->expectExceptionMessage('Character not found');
 
         $sut->execute(999999); // ID que no existe
+    }
+
+    private function mockCharacterRepository(array $characters): CharacterRepository
+    {
+        $repository = new ArrayCharacterRepository();
+
+        foreach ($characters as $character) {
+            $repository->save($character);
+        }
+
+        return $repository;
     }
 }
