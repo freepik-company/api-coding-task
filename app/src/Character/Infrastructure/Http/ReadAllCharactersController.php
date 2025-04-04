@@ -3,7 +3,6 @@
 namespace App\Character\Infrastructure\Http;
 
 use App\Character\Application\ReadAllCharactersUseCase;
-use App\Character\Domain\CharacterRepository;
 use App\Character\Domain\CharacterToArrayTransformer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -37,4 +36,4 @@ class ReadAllCharactersController
             return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
         }
     }
-} 
+}

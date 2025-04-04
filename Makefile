@@ -82,3 +82,6 @@ test-group: ## Ejecuta los test de un grupo
 
 test-coverage: ## Ejecuta los test y genera el coverage
 	docker compose exec php vendor/bin/phpunit --colors=always test --testdox --coverage-html test/coverage
+
+docs: ## Genera la documentación de la API con ApiGen
+	docker compose exec php mkdir -p /var/www/generate && docker compose exec php vendor/bin/apigen generate -o /var/www/docs/api --working-dir /var/www --workers 1 src

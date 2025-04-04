@@ -3,51 +3,65 @@
 namespace App\Character\Infrastructure\Http;
 
 use App\Character\Application\UpdateCharacterUseCase;
-use Slim\Psr7\Request;
-use Slim\Psr7\Response;
+use App\Character\Domain\CharacterToArrayTransformer;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use App\Character\Application\UpdateCharacterUseCaseRequest;
 
 class UpdateCharacterController
 {
     public function __construct(
-        private UpdateCharacterUseCase $updateCharacterUseCase
-    ) {
-    }
+        private UpdateCharacterUseCase $useCase
+    ) {}
 
     public function __invoke(Request $request, Response $response, array $args): Response
     {
-        $data = $request->getParsedBody();
+        // Parsear el cuerpo de la petición manualmente
+        $rawBody = (string) $request->getBody();
+        $data = json_decode($rawBody, true);
 
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $response->getBody()->write(json_encode([
+                'error' => 'Invalid JSON',
+                'message' => json_last_error_msg()
+            ]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+
+        // Validar campos requeridos
         $requiredFields = ['name', 'birth_date', 'kingdom', 'equipment_id', 'faction_id'];
-        foreach ($requiredFields as $field){
-            if (!isset($data[$field])){
+        foreach ($requiredFields as $field) {
+            if (!isset($data[$field])) {
                 $response->getBody()->write(json_encode(['error' => "Missing required field: {$field}"]));
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
             }
         }
 
         try {
-            $request = new \App\Character\Application\UpdateCharacterUseCaseRequest(
-                id: $args['id'],
-                name: $data['name'],
-                birthDate: $data['birth_date'],
-                kingdom: $data['kingdom'],
-                equipmentId: $data['equipment_id'],
-                factionId: $data['faction_id']
+            $useCaseResponse = $this->useCase->execute(
+                new UpdateCharacterUseCaseRequest(
+                    $data['name'],
+                    $data['birth_date'],
+                    $data['kingdom'],
+                    $data['equipment_id'],
+                    $data['faction_id'],
+                    $args['id']
+                )
             );
 
-            $character = $this->updateCharacterUseCase->execute($request);
-
+            // Return success response
             $response->getBody()->write(json_encode([
-                'id' => $character->getId(),
+                'character' => CharacterToArrayTransformer::transform($useCaseResponse),
                 'message' => 'Character updated successfully'
             ]));
 
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
-
+            return $response->withHeader('content-Type', 'application/json')->withStatus(200);
         } catch (\Exception $e) {
             $response->getBody()->write(json_encode([
-                'error' => $e->getMessage()
+                'error' => 'Error updating character',
+                'message' => $e->getMessage()
             ]));
+
             return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
         }
     }

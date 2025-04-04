@@ -2,14 +2,17 @@ services:
   php:
     image: graphicresources/itpg-api-coding-task:development
     working_dir: /var/www
-    command: php -S 0.0.0.0:8080 -t public
+    command: php -S 0.0.0.0:8080 -t public -t docs -t test public/index.php
     environment:
       docker: "true"
-      XDEBUG_MODE: coverage
+      XDEBUG_MODE: "coverage"
     ports:
       - "8080:8080"
     volumes:
       - ./app:/var/www
+    depends_on:
+      - db
+      - cache
     networks:
       - bridge
     env_file:
@@ -24,6 +27,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: lotr
+      MYSQL_ROOT_HOST: '%'
+    command: --default-authentication-plugin=mysql_native_password
     healthcheck:
       test: "/usr/bin/mysql --user=root --password=root --execute \"SHOW DATABASES;\""
       interval: 3s

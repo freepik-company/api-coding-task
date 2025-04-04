@@ -1,8 +1,9 @@
 <?php
 
 use Slim\Factory\AppFactory;
+use Slim\Middleware\BodyParsingMiddleware;
 
-/* Alternativa a BodyParsingMiddleware sería usar: $data->json_decode(file_get_contents('php://input'), true); 
+/* Alternativa a BodyParsingMiddleware sería usar: $data->json_decode(file_get_contents('php://input'), true);
 habria que ponerlo en el controlador*/
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -19,12 +20,10 @@ $definitions($containerBuilder);
 
 $container = $containerBuilder->build();
 
-$app = AppFactory::create(container:$container);
+$app = AppFactory::create(container: $container);
 
 $routes = require __DIR__ . '/../config/routes.php';
 $routes($app);
 
 // Add middleware to parse the body of the request as JSON
-//$app->add(new BodyParsingMiddleware());
-
-
+$app->add(new BodyParsingMiddleware());
