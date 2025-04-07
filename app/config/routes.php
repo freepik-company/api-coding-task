@@ -6,6 +6,10 @@ use App\Character\Infrastructure\Http\ReadAllCharactersController;
 use App\Character\Infrastructure\Http\ReadCharacterController;
 use App\Character\Infrastructure\Http\UpdateCharacterController;
 use App\Equipment\Infrastructure\Http\CreateEquipmentController;
+use App\Equipment\Infrastructure\Http\DeleteEquipmentController;
+use App\Equipment\Infrastructure\Http\ReadAllEquipmentController;
+use App\Equipment\Infrastructure\Http\ReadEquipmentController;
+use App\Equipment\Infrastructure\Http\UpdateEquipmentController;
 use Slim\App;
 
 /**
@@ -27,6 +31,10 @@ return function (App $app) {
     $app->put('/character/{id}', UpdateCharacterController::class);
 
     // Add routes for the equipment resource
-    $app->post('/equipments', CreateEquipmentController::class);
+    $app->post('/equipment', CreateEquipmentController::class);
+    $app->get('/equipment/{id}', ReadEquipmentController::class);
+    $app->put('/equipment/{id}', UpdateEquipmentController::class);
+    $app->get('/equipments', ReadAllEquipmentController::class);
+    $app->delete('/equipment/{id}', DeleteEquipmentController::class);
     $app->run();
 };

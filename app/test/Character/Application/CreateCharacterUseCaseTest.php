@@ -90,6 +90,10 @@ class CreateCharacterUseCaseTest extends TestCase
                 CreateCharacterUseCaseRequestMotherObject::withInvalidFactionId(),
                 CharacterValidationException::factionIdRequired()
             ],
+            'without birth date' => [
+                CreateCharacterUseCaseRequestMotherObject::withoutBirthDate(),
+                CharacterValidationException::birthDateRequired()
+            ]
         ];
     }
 }

@@ -16,13 +16,15 @@ use Slim\Psr7\Request as SlimRequest;
 use Slim\Psr7\Uri;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class ReadCharacterControllerTest extends TestCase{
-/** 
-* @test
-* @group happy-path
-* @group acceptance
-*/
-    public function givenARepositoryWithOneCharacterIdWhenReadCharacterThenReturnCharacterAsJson(): void{
+class ReadCharacterControllerTest extends TestCase
+{
+    /**
+     * @test
+     * @group happy-path
+     * @group acceptance
+     */
+    public function givenARepositoryWithOneCharacterIdWhenReadCharacterThenReturnCharacterAsJson(): void
+    {
         $app = $this->getAppInstance();
         $repository = $app->getContainer()->get(CharacterRepository::class);
         $expectedCharacter = new Character(
@@ -43,7 +45,6 @@ class ReadCharacterControllerTest extends TestCase{
         ]);
 
         $this->assertEquals($serializedPayload, $payload);
-
     }
 
     private function createRequest(
@@ -52,20 +53,21 @@ class ReadCharacterControllerTest extends TestCase{
         array $headers = ['HTTP_ACCEPT' => 'application/json'],
         array $cookies = [],
         array $serverParams = []
-    ): Request{
-        $uri = new Uri('', '', 80,$path);
+    ): Request {
+        $uri = new Uri('', '', 80, $path);
         $handle = fopen('php://temp', 'w+');
         $stream = (new StreamFactory())->createStreamFromResource($handle);
 
         $h = new Headers();
-        foreach($headers as $name => $value){
+        foreach ($headers as $name => $value) {
             $h->addHeader($name, $value);
         }
 
         return new SlimRequest($method, $uri, $h, $cookies, $serverParams, $stream);
     }
 
-    private function getAppInstance(): App{
+    private function getAppInstance(): App
+    {
         $dotenv = Dotenv::createImmutable(__DIR__ . '/../../../../');
         $dotenv->load();
 
@@ -84,5 +86,4 @@ class ReadCharacterControllerTest extends TestCase{
 
         return $app;
     }
-
 }

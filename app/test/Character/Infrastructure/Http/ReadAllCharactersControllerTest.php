@@ -2,84 +2,121 @@
 
 namespace App\Test\Character\Infrastructure\Http;
 
-use App\Character\Application\ReadAllCharactersUseCase;
+use App\Character\Domain\Character;
 use App\Character\Domain\CharacterRepository;
-use App\Character\Infrastructure\Http\ReadAllCharactersController;
-use App\Test\Character\Application\MotherObject\ReadAllCharactersUseCaseRequestMotherObject;
+use App\Character\Domain\CharacterToArrayTransformer;
+use DI\ContainerBuilder;
+use Dotenv\Dotenv;
 use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\MockObject;
-use Slim\Psr7\Factory\ServerRequestFactory;
-use Slim\Psr7\Response;
+use Slim\App;
+use Slim\Factory\AppFactory;
+use Slim\Psr7\Factory\StreamFactory;
+use Slim\Psr7\Headers;
+use Slim\Psr7\Request as SlimRequest;
+use Slim\Psr7\Uri;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use PDO;
 
 class ReadAllCharactersControllerTest extends TestCase
 {
-    /** @var CharacterRepository&MockObject */
+    private App $app;
     private CharacterRepository $repository;
-    private ReadAllCharactersUseCase $useCase;
-    private ReadAllCharactersController $controller;
+    private PDO $pdo;
 
     protected function setUp(): void
     {
-        /** @var CharacterRepository&MockObject $repository */
-        $repository = $this->createMock(CharacterRepository::class);
-        // @phpstan-ignore-next-line
-        $this->repository = $repository;
-        $this->useCase = new ReadAllCharactersUseCase($this->repository);
-        $this->controller = new ReadAllCharactersController($this->useCase);
+        $this->app = $this->getAppInstance();
+        $this->repository = $this->app->getContainer()->get(CharacterRepository::class);
+        $this->pdo = $this->app->getContainer()->get(PDO::class);
+
+        // Clean database before each test to ensure a fresh state
+        $this->pdo->exec('DELETE FROM characters');  // First delete the characters
+        $this->pdo->exec('DELETE FROM equipments');  // Then delete the equipments
+        $this->pdo->exec('DELETE FROM factions');    // Finally delete the factions
+
+        // Insert test data
+        $this->pdo->exec('INSERT INTO equipments (id, name, type, made_by) VALUES (1, "Sword", "weapon", "Blacksmith")');
+        $this->pdo->exec('INSERT INTO factions (id, faction_name, description) VALUES (1, "Alliance", "The Alliance faction")');
     }
 
     /**
-     * @dataProvider provideCharacters
+     * @test
      * @group happy-path
      * @group acceptance
-     * @group readAllCharactersController
+     * @group readAllCharacters
      */
-    public function testShouldReturnAllCharacters(array $characters): void
+    public function givenARepositoryWithMultipleCharactersWhenReadAllCharactersThenReturnCharactersAsJson(): void
     {
-        // Arrange
-        $this->repository
-            ->expects($this->once())
-            ->method('findAll')
-            ->willReturn($characters);
+        // Crear y guardar múltiples personajes
+        $character1 = new Character(
+            'John Doe',
+            '1990-01-01',
+            'Kingdom of Doe',
+            1,
+            1
+        );
+        $character2 = new Character(
+            'Jane Smith',
+            '1992-05-15',
+            'Kingdom of Smith',
+            1,
+            1
+        );
 
-        $request = (new ServerRequestFactory())->createServerRequest('GET', '/characters');
-        $response = new Response();
+        $character1 = $this->repository->save($character1);
+        $character2 = $this->repository->save($character2);
 
-        // Act
-        $response = $this->controller->__invoke($request, $response, []);
+        $request = $this->createRequest('GET', '/characters');
+        $response = $this->app->handle($request);
 
-        // Assert
-        $this->assertEquals(200, $response->getStatusCode());
-        $responseData = json_decode((string)$response->getBody(), true);
+        $payload = (string) $response->getBody();
+        $serializedPayload = json_encode([
+            'characters' => [
+                CharacterToArrayTransformer::transform($character1),
+                CharacterToArrayTransformer::transform($character2)
+            ],
+        ]);
 
-        $this->assertArrayHasKey('characters', $responseData);
-        $this->assertCount(count($characters), $responseData['characters']);
-
-        foreach ($characters as $index => $character) {
-            $this->assertEquals($character->getName(), $responseData['characters'][$index]['name']);
-            $this->assertEquals($character->getBirthDate(), $responseData['characters'][$index]['birth-date']);
-            $this->assertEquals($character->getKingdom(), $responseData['characters'][$index]['kingdom']);
-            $this->assertEquals($character->getEquipmentId(), $responseData['characters'][$index]['equipment-id']);
-            $this->assertEquals($character->getFactionId(), $responseData['characters'][$index]['faction-id']);
-            $this->assertEquals($character->getId(), $responseData['characters'][$index]['id']);
-        }
+        $this->assertEquals($serializedPayload, $payload);
     }
 
-    public function provideCharacters(): array
+    private function createRequest(
+        string $method,
+        string $path,
+        array $headers = ['HTTP_ACCEPT' => 'application/json'],
+        array $cookies = [],
+        array $serverParams = []
+    ): Request {
+        $uri = new Uri('', '', 80, $path);
+        $handle = fopen('php://temp', 'w+');
+        $stream = (new StreamFactory())->createStreamFromResource($handle);
+
+        $h = new Headers();
+        foreach ($headers as $name => $value) {
+            $h->addHeader($name, $value);
+        }
+
+        return new SlimRequest($method, $uri, $h, $cookies, $serverParams, $stream);
+    }
+
+    private function getAppInstance(): App
     {
-        return [
-            'empty repository' => [
-                ReadAllCharactersUseCaseRequestMotherObject::withEmptyRepository()
-            ],
-            'one character' => [
-                ReadAllCharactersUseCaseRequestMotherObject::withOneCharacter()
-            ],
-            'multiple characters' => [
-                ReadAllCharactersUseCaseRequestMotherObject::withMultipleCharacters()
-            ],
-            'three characters' => [
-                ReadAllCharactersUseCaseRequestMotherObject::withThreeCharacters()
-            ]
-        ];
+        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../../../');
+        $dotenv->load();
+
+        $containerBuilder = new ContainerBuilder();
+
+        $settings = require __DIR__ . '/../../../../config/definitions.php';
+        $settings($containerBuilder);
+
+        $container = $containerBuilder->build();
+
+        AppFactory::setContainer($container);
+        $app = AppFactory::create();
+
+        $routes = require __DIR__ . '/../../../../config/routes.php';
+        $routes($app);
+
+        return $app;
     }
 }

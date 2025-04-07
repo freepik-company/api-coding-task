@@ -5,76 +5,78 @@ namespace App\Equipment\Infrastructure\Persistance\Pdo;
 use App\Equipment\Domain\Equipment;
 use App\Equipment\Domain\EquipmentRepository;
 use PDO;
+use App\Shared\Infrastructure\Pdo\Exception\RowInsertionFailedException as ExceptionRowInsertionFailedException;
 
 class MySQLEquipmentRepository implements EquipmentRepository
 {
-    public function __construct(private PDO $pdo)
-    {
-    }
+    public function __construct(private PDO $pdo) {}
 
-    public function find(int $id): ?Equipment{
+    public function find(int $id): ?Equipment
+    {
         $stmt = $this->pdo->prepare('SELECT * FROM equipments WHERE id = :id');
         $stmt->execute(['id' => $id]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$data){
+        if (!$data) {
             return null;
         }
 
         return self::fromArray($data, $this->pdo);
     }
 
-    private function fromArray(array $data): Equipment{
-        $equipment = new Equipment();
-
-        if (isset($data['id'])){
-            $equipment->setId($data['id']);
-        }
-
-        return $equipment
-            ->setName($data['name'])
-            ->setType($data['type'])
-            ->setMadeBy($data['made_by']);
+    private function fromArray(array $data): Equipment
+    {
+        return new Equipment(
+            $data['name'],
+            $data['type'],
+            $data['made_by'],
+            $data['id'] ?? null
+        );
     }
 
-    public function findAll(): array{
+    public function findAll(): array
+    {
         $stmt = $this->pdo->query('SELECT * FROM equipments');
         $equipments = [];
 
-        while ($data = $stmt->fetch(PDO::FETCH_ASSOC)){
+        while ($data = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $equipments[] = self::fromArray($data);
         }
 
         return $equipments;
     }
 
-    public function save(Equipment $equipment):Equipment{
-        if (!empty($equipment->getId())){
+    public function save(Equipment $equipment): Equipment
+    {
+        if (!empty($equipment->getId())) {
             return $this->update($equipment);
         }
 
         return $this->insert($equipment);
     }
 
-    private function insert(Equipment $equipment): Equipment{
+    private function insert(Equipment $equipment): Equipment
+    {
         $sql = 'INSERT INTO equipments (name, type, made_by) VALUES (:name, :type, :made_by)';
 
         $stmt = $this->pdo->prepare($sql);
-        $result = $stmt->execute([
+        $result = $stmt->execute(MySQLEquipmentToArrayTransformer::transform($equipment));
+
+        if (!$result) {
+            throw ExceptionRowInsertionFailedException::build();
+        }
+
+        return MySQLEquipmentFactory::buildFromArray([
             'name' => $equipment->getName(),
             'type' => $equipment->getType(),
             'made_by' => $equipment->getMadeBy(),
+            'id' => $this->pdo->lastInsertId()
         ]);
-
-        if(!$result){
-            $equipment->setId($this->pdo->lastInsertId());
-        }
-
-        return $equipment;
     }
 
 
-    private function update(Equipment $equipment): Equipment{
+    private function update(Equipment $equipment): Equipment
+    {
         $sql = 'UPDATE equipments
             SET name = :name,
             type = :type,
@@ -84,7 +86,7 @@ class MySQLEquipmentRepository implements EquipmentRepository
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
             'id' => $equipment->getId(),
-            'name' => $equipment ->getName(),
+            'name' => $equipment->getName(),
             'type' => $equipment->getType(),
             'made_by' => $equipment->getMadeBy(),
         ]);
@@ -92,8 +94,9 @@ class MySQLEquipmentRepository implements EquipmentRepository
         return $equipment;
     }
 
-    public function delete(Equipment $equipment): bool{
-        if (null === $equipment->getId()){
+    public function delete(Equipment $equipment): bool
+    {
+        if (null === $equipment->getId()) {
             return false;
         }
 

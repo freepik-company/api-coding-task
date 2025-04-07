@@ -77,8 +77,8 @@ test: ## Ejecuta los test
 test-unit : ## Ejecuta los test unitarios
 	docker compose exec php vendor/bin/phpunit --colors=always test --testdox --group unit
 
-test-group: ## Ejecuta los test de un grupo
-	docker compose exec php vendor/bin/phpunit --colors=always test --testdox --group $(filter-out $@,$(MAKECMDGOALS))
+test-group-%: ## Ejecuta los test de un grupo
+	docker compose exec php vendor/bin/phpunit --colors=always test --testdox --group $*
 
 test-coverage: ## Ejecuta los test y genera el coverage
 	docker compose exec php vendor/bin/phpunit --colors=always test --testdox --coverage-html test/coverage

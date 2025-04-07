@@ -24,12 +24,12 @@ class Equipment
     }
 
 
-    // Getters and Setters
+    // Getters (seters are not needed because we are using semantic setters)
     public function getId(): ?int
     {
         return $this->id;
     }
-    
+
     public function getName(): string
     {
         return $this->name;
@@ -38,50 +38,10 @@ class Equipment
     public function getType(): string
     {
         return $this->type;
-    }   
+    }
 
     public function getMadeBy(): string
     {
         return $this->made_by;
-    }   
-
-    public function setId(int $id): self
-    {
-        $this->id = $id;
-        return $this;
-    }   
-
-    public function setName(string $name): self
-    {
-        $this->name = $name;
-        return $this;
-    }   
-
-    public function setType(string $type): self
-    {
-        $this->type = $type;
-        return $this;
-    }      
-
-    public function setMadeBy(string $made_by): self
-    {
-        $this->made_by = $made_by;
-        return $this;
-    }      
-      
-    public function toArray(): array
-    {
-        $data = [
-            'name' => $this->name,
-            'type'=> $this->type,
-            'made_by'=> $this->made_by,
-        ];
-
-        if ($this->id !== null){
-            $data['id'] = $this-> id;
-        }
-
-        return $data;
     }
-
 }

@@ -82,4 +82,15 @@ class CreateCharacterUseCaseRequestMotherObject
             0
         );
     }
+
+    public static function withoutBirthDate(): CreateCharacterUseCaseRequest
+    {
+        return new CreateCharacterUseCaseRequest(
+            'Pepe',
+            '',
+            'Spain',
+            1,
+            1
+        );
+    }
 }

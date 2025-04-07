@@ -11,6 +11,10 @@ use App\Character\Domain\CharacterRepository;
 use App\Character\Infrastructure\Persistence\Cache\CachedMySQLCharacterRepository;
 use App\Character\Infrastructure\Persistence\Pdo\MySQLCharacterRepository;
 use App\Equipment\Application\CreateEquipmentUseCase;
+use App\Equipment\Application\DeleteEquipmentUseCase;
+use App\Equipment\Application\ReadAllEquipmentUseCase;
+use App\Equipment\Application\ReadEquipmentUseCase;
+use App\Equipment\Application\UpdateEquipmentUseCase;
 use App\Equipment\Domain\EquipmentRepository;
 use App\Equipment\Infrastructure\Persistance\Pdo\MySQLEquipmentRepository;
 use App\Equipment\Infrastructure\Persistence\Cache\CachedMySQLEquipmentRepository;
@@ -27,7 +31,7 @@ use Redis;
 /**
  * This file is used to define the dependencies of the application.
  * It is used by the ContainerBuilder to build the container.
- * 
+ *
  * @param ContainerBuilder $containerBuilder
  * @return void
  */
@@ -52,7 +56,7 @@ return function (ContainerBuilder $containerBuilder) {
 
         /**
          * Redis is used to cache the characters.
-         * 
+         *
          * @return Redis
          */
         Redis::class => function () {
@@ -64,7 +68,7 @@ return function (ContainerBuilder $containerBuilder) {
 
         /**
          * Logger is used to log the messages.
-         * 
+         *
          * @return LoggerInterface
          */
         LoggerInterface::class => function () {
@@ -81,7 +85,7 @@ return function (ContainerBuilder $containerBuilder) {
 
         /**
          * CharacterRepository is used to get the characters from the database.
-         * 
+         *
          * @param ContainerInterface $c
          * @return CharacterRepository
          */
@@ -103,7 +107,7 @@ return function (ContainerBuilder $containerBuilder) {
 
         /**
          * CreateCharacterUseCase is used to create a new character.
-         * 
+         *
          * @param ContainerInterface $c
          * @return CreateCharacterUseCase
          */
@@ -115,7 +119,7 @@ return function (ContainerBuilder $containerBuilder) {
 
         /**
          * ReadCharacterUseCase is used to read a character by id.
-         * 
+         *
          * @param ContainerInterface $c
          * @return ReadCharacterUseCase
          */
@@ -153,8 +157,33 @@ return function (ContainerBuilder $containerBuilder) {
             }
             return new MySQLEquipmentRepository($c->get(PDO::class));
         },
+        // Create an equipment
         CreateEquipmentUseCase::class => function (ContainerInterface $c) {
             return new CreateEquipmentUseCase(
+                $c->get(EquipmentRepository::class)
+            );
+        },
+        // Read an equipment by id
+        ReadEquipmentUseCase::class => function (ContainerInterface $c) {
+            return new ReadEquipmentUseCase(
+                $c->get(EquipmentRepository::class)
+            );
+        },
+        // Update an equipment by id
+        UpdateEquipmentUseCase::class => function (ContainerInterface $c) {
+            return new UpdateEquipmentUseCase(
+                $c->get(EquipmentRepository::class)
+            );
+        },
+        // Read all equipments
+        ReadAllEquipmentUseCase::class => function (ContainerInterface $c) {
+            return new ReadAllEquipmentUseCase(
+                $c->get(EquipmentRepository::class)
+            );
+        },
+        // Delete an equipment by id
+        DeleteEquipmentUseCase::class => function (ContainerInterface $c) {
+            return new DeleteEquipmentUseCase(
                 $c->get(EquipmentRepository::class)
             );
         },

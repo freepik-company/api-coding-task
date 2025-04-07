@@ -72,10 +72,11 @@ INSERT INTO `characters` (
   1,
   1
 );
+# Create test database
 CREATE DATABASE `test` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
- 
+
  USE `test`;
- 
+
  DROP TABLE IF EXISTS `factions`;
  CREATE TABLE `factions` (
    `id` int NOT NULL AUTO_INCREMENT,
@@ -83,7 +84,7 @@ CREATE DATABASE `test` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
    `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
    PRIMARY KEY (`id`)
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
- 
+
  DROP TABLE IF EXISTS `equipments`;
  CREATE TABLE `equipments` (
    `id` int NOT NULL AUTO_INCREMENT,
@@ -92,7 +93,7 @@ CREATE DATABASE `test` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
    `made_by` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
    PRIMARY KEY (`id`)
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
- 
+
  DROP TABLE IF EXISTS `characters`;
  CREATE TABLE `characters` (
    `id` int NOT NULL AUTO_INCREMENT,
@@ -107,7 +108,7 @@ CREATE DATABASE `test` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
    CONSTRAINT `characters_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipments` (`id`),
    CONSTRAINT `characters_ibfk_2` FOREIGN KEY (`faction_id`) REFERENCES `factions` (`id`)
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
- 
+
  INSERT INTO `factions` (
    `id`,
    `faction_name`,
@@ -117,7 +118,7 @@ CREATE DATABASE `test` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
    'MORDOR',
    'Mordor es un país situado al sureste de la Tierra Media, que tuvo gran importancia durante la Guerra del Anillo por ser el lugar donde Sauron, el Señor Oscuro, decidió edificar su fortaleza de Barad-dûr para intentar atacar y dominar a todos los pueblos de la Tierra Media.'
  );
- 
+
  INSERT INTO `equipments` (
    `id`,
    `name`,
