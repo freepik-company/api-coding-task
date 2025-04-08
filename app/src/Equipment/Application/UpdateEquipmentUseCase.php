@@ -2,12 +2,12 @@
 
 namespace App\Equipment\Application;
 
+use App\Equipment\Domain\Equipment;
+use App\Equipment\Domain\EquipmentRepository;
+
 /**
  * This use case is used to update an equipment
  */
-
-use App\Equipment\Domain\Equipment;
-use App\Equipment\Domain\EquipmentRepository;
 
 class UpdateEquipmentUseCase
 {

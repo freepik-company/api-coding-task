@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Equipment\Infrastructure\Persistance\Pdo;
+namespace App\Equipment\Infrastructure\Persistence\Pdo;
 
 use App\Equipment\Domain\Equipment;
 use App\Equipment\Domain\EquipmentFactory;

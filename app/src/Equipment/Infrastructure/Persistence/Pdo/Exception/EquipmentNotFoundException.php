@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Equipment\Infrastructure\Persistance\Pdo\Exception;
+namespace App\Equipment\Infrastructure\Persistence\Pdo\Exception;
 
 class EquipmentNotFoundException extends \Exception
 {

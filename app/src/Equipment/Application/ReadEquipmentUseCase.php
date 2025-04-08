@@ -6,7 +6,7 @@ use App\Equipment\Domain\Equipment;
 use App\Equipment\Domain\EquipmentRepository;
 
 /**
- *
+ * ReadEquipmentUseCase is a class that is used to read an equipment.
  */
 
 class ReadEquipmentUseCase

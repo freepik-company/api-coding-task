@@ -16,8 +16,16 @@ use App\Equipment\Application\ReadAllEquipmentUseCase;
 use App\Equipment\Application\ReadEquipmentUseCase;
 use App\Equipment\Application\UpdateEquipmentUseCase;
 use App\Equipment\Domain\EquipmentRepository;
-use App\Equipment\Infrastructure\Persistance\Pdo\MySQLEquipmentRepository;
+use App\Equipment\Infrastructure\Persistence\Pdo\MySQLEquipmentRepository;
 use App\Equipment\Infrastructure\Persistence\Cache\CachedMySQLEquipmentRepository;
+use App\Faction\Application\CreateFactionUseCase;
+use App\Faction\Application\DeleteFactionUseCase;
+use App\Faction\Application\ReadAllFactionsUseCase;
+use App\Faction\Application\ReadFactionUseCase;
+use App\Faction\Application\UpdateFactionUseCase;
+use App\Faction\Domain\FactionRepository;
+use App\Faction\Infrastructure\Persistence\Cache\CachedMySQLFactionRepository;
+use App\Faction\Infrastructure\Persistence\Pdo\MySQLFactionRepository;
 use DI\ContainerBuilder;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
@@ -187,5 +195,48 @@ return function (ContainerBuilder $containerBuilder) {
                 $c->get(EquipmentRepository::class)
             );
         },
+
+
+        // Define the FactionRepository
+        FactionRepository::class => function (ContainerInterface $c) {
+            if ((bool) ((int) $_ENV['CACHE_ENABLED'])) {
+                return new CachedMySQLFactionRepository(
+                    new MySQLFactionRepository($c->get(PDO::class)),
+                    $c->get(Redis::class),
+                    $c->get(LoggerInterface::class)
+                );
+            }
+            return new MySQLFactionRepository($c->get(PDO::class));
+        },
+        // Create a faction
+        CreateFactionUseCase::class => function (ContainerInterface $c) {
+            return new CreateFactionUseCase(
+                $c->get(FactionRepository::class)
+            );
+        },
+        // Read a faction by id
+        ReadFactionUseCase::class => function (ContainerInterface $c) {
+            return new ReadFactionUseCase(
+                $c->get(FactionRepository::class)
+            );
+        },
+        // Read all factions
+        ReadAllFactionsUseCase::class => function (ContainerInterface $c) {
+            return new ReadAllFactionsUseCase(
+                $c->get(FactionRepository::class)
+            );
+        },
+        // Update a faction by id
+        UpdateFactionUseCase::class => function (ContainerInterface $c) {
+            return new UpdateFactionUseCase(
+                $c->get(FactionRepository::class)
+            );
+        },
+        // Delete a faction by id
+        DeleteFactionUseCase::class => function (ContainerInterface $c) {
+            return new DeleteFactionUseCase(
+                $c->get(FactionRepository::class)
+            );
+        }
     ]);
 };

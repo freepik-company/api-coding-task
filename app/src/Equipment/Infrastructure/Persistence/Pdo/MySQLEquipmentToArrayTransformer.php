@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Equipment\Infrastructure\Persistance\Pdo;
+namespace App\Equipment\Infrastructure\Persistence\Pdo;
 
 use App\Equipment\Domain\Equipment;
 
@@ -14,12 +14,11 @@ class MySQLEquipmentToArrayTransformer
             'type' => $equipment->getType(),
             'made_by' => $equipment->getMadeBy(),
         ];
-        
+
         if (null !== $equipment->getId()) {
             $data['id'] = $equipment->getId();
         }
 
         return $data;
     }
-
 }

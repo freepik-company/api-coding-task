@@ -10,6 +10,11 @@ use App\Equipment\Infrastructure\Http\DeleteEquipmentController;
 use App\Equipment\Infrastructure\Http\ReadAllEquipmentController;
 use App\Equipment\Infrastructure\Http\ReadEquipmentController;
 use App\Equipment\Infrastructure\Http\UpdateEquipmentController;
+use App\Faction\Infrastructure\Http\CreateFactionController;
+use App\Faction\Infrastructure\Http\DeleteFactionController;
+use App\Faction\Infrastructure\Http\ReadAllFactionsController;
+use App\Faction\Infrastructure\Http\ReadFactionController;
+use App\Faction\Infrastructure\Http\UpdateFactionController;
 use Slim\App;
 
 /**
@@ -36,5 +41,13 @@ return function (App $app) {
     $app->put('/equipment/{id}', UpdateEquipmentController::class);
     $app->get('/equipments', ReadAllEquipmentController::class);
     $app->delete('/equipment/{id}', DeleteEquipmentController::class);
+
+    // Add routes for the faction resource
+    $app->post('/faction', CreateFactionController::class);
+    $app->get('/factions', ReadAllFactionsController::class);
+    $app->get('/faction/{id}', ReadFactionController::class);
+    $app->put('/faction/{id}', UpdateFactionController::class);
+    $app->delete('/faction/{id}', DeleteFactionController::class);
+
     $app->run();
 };

@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Equipment\Infrastructure\Persistance\Pdo;
+namespace App\Equipment\Infrastructure\Persistence\Pdo;
 
 use App\Equipment\Domain\Equipment;
 use App\Equipment\Domain\EquipmentRepository;
 use PDO;
 use App\Shared\Infrastructure\Pdo\Exception\RowInsertionFailedException as ExceptionRowInsertionFailedException;
+use App\Equipment\Infrastructure\Persistence\Pdo\MySQLEquipmentFactory;
 
 class MySQLEquipmentRepository implements EquipmentRepository
 {
