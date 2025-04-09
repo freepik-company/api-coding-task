@@ -46,7 +46,7 @@ class ReadAllCharactersUseCaseTest extends TestCase
         }
     }
 
-    public function provideCharacters(): array
+    public static function provideCharacters(): array
     {
         return [
             'empty repository' => [
