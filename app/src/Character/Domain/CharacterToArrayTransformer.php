@@ -4,7 +4,8 @@ namespace App\Character\Domain;
 
 use App\Character\Domain\Character;
 
-class CharacterToArrayTransformer{
+class CharacterToArrayTransformer
+{
 
     public static function transform(Character $character): array
     {
@@ -16,7 +17,5 @@ class CharacterToArrayTransformer{
             'equipment-id' => $character->getEquipmentId(),
             'faction-id' => $character->getFactionId()
         ];
-
     }
-    
 }

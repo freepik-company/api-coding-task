@@ -17,21 +17,32 @@ use Slim\Psr7\Uri;
 
 abstract class BaseTestCase extends TestCase
 {
-    protected function getAppInstance(bool $cacheEnabled = false): App
+    protected function getAppInstanceWithCache(): App
     {
-        // Forzar variable de entorno para habilitar o deshabilitar caché
+        return $this->buildAppInstance(true);
+    }
+
+    protected function getAppInstanceWithoutCache(): App
+    {
+        return $this->buildAppInstance(false);
+    }
+
+    private function buildAppInstance(bool $cacheEnabled): App
+    {
+        // Forzar variable de entorno
         putenv('CACHE_ENABLED=' . ($cacheEnabled ? '1' : '0'));
         $_ENV['CACHE_ENABLED'] = $cacheEnabled ? '1' : '0';
         $_SERVER['CACHE_ENABLED'] = $cacheEnabled ? '1' : '0';
 
-        // Cargar .env si no está ya cargado
+        // Cargar .env solo si no está cargado
         if (!isset($_ENV['APP_ENV'])) {
-            $dotenv = Dotenv::createImmutable(__DIR__ . '/../../../');
+            $dotenv = Dotenv::createImmutable(dirname(__DIR__, 2)); // Ruta corregida
             $dotenv->load();
         }
 
         $containerBuilder = new ContainerBuilder();
-        $definitions = require __DIR__ . '/../../../config/definitions.php';
+
+        $definitions = require dirname(__DIR__, 2) . '/config/definitions.php';
         $definitions($containerBuilder);
 
         $container = $containerBuilder->build();
@@ -39,8 +50,13 @@ abstract class BaseTestCase extends TestCase
         AppFactory::setContainer($container);
         $app = AppFactory::create();
 
-        $routes = require __DIR__ . '/../../../config/routes.php';
+        $routes = require dirname(__DIR__, 2) . '/config/routes.php';
         $routes($app);
+
+        foreach ($app->getRouteCollector()->getRoutes() as $route) {
+            echo $route->getPattern() . PHP_EOL;
+        }
+
 
         return $app;
     }
@@ -69,5 +85,24 @@ abstract class BaseTestCase extends TestCase
             [],
             $stream
         );
+    }
+
+    protected function createRequest(
+        string $method,
+        string $path,
+        array $headers = ['HTTP_ACCEPT' => 'application/json'],
+        array $cookies = [],
+        array $serverParams = []
+    ): ServerRequestInterface {
+        $uri = new Uri('', '', 80, $path);
+        $handle = fopen('php://temp', 'w+');
+        $stream = (new StreamFactory())->createStreamFromResource($handle);
+
+        $h = new Headers();
+        foreach ($headers as $name => $value) {
+            $h->addHeader($name, $value);
+        }
+
+        return new SlimRequest($method, $uri, $h, $cookies, $serverParams, $stream);
     }
 }

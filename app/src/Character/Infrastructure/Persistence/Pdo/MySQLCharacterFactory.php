@@ -13,9 +13,9 @@ class MySQLCharacterFactory
             $data['name'],
             $data['birth_date'],
             $data['kingdom'],
-            $data['equipment_id'],
-            $data['faction_id'],
-            $data['id'] ?? null
+            (int) $data['equipment_id'],
+            (int) $data['faction_id'],
+            isset($data['id']) ? (int) $data['id'] : null
         );
     }
 }

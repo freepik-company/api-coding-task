@@ -2,31 +2,31 @@
 
 namespace App\Test\Character\Infrastructure\Http;
 
+use App\Character\Application\ReadCharacterUseCase;
 use App\Character\Domain\Character;
 use App\Character\Domain\CharacterRepository;
 use App\Character\Domain\CharacterToArrayTransformer;
-use DI\ContainerBuilder;
-use Dotenv\Dotenv;
-use PHPUnit\Framework\TestCase;
-use Slim\App;
-use Slim\Factory\AppFactory;
+use App\Character\Infrastructure\Http\ReadCharacterController;
+use App\Test\Shared\BaseTestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\Group;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request as SlimRequest;
+use Slim\Psr7\Response;
 use Slim\Psr7\Uri;
-use Psr\Http\Message\ServerRequestInterface as Request;
 
-class ReadCharacterControllerTest extends TestCase
+class ReadCharacterControllerTest extends BaseTestCase
 {
-    /**
-     * @test
-     * @group happy-path
-     * @group acceptance
-     */
+    #[Test]
+    #[Group('happy-path')]
+    #[Group('acceptance')]
+    #[Group('readCharacter')]
     public function givenARepositoryWithOneCharacterIdWhenReadCharacterThenReturnCharacterAsJson(): void
     {
-        $app = $this->getAppInstance();
+        $app = $this->getAppInstanceWithoutCache();
         $repository = $app->getContainer()->get(CharacterRepository::class);
+
         $expectedCharacter = new Character(
             'John Doe',
             '1990-01-01',
@@ -47,43 +47,34 @@ class ReadCharacterControllerTest extends TestCase
         $this->assertEquals($serializedPayload, $payload);
     }
 
-    private function createRequest(
-        string $method,
-        string $path,
-        array $headers = ['HTTP_ACCEPT' => 'application/json'],
-        array $cookies = [],
-        array $serverParams = []
-    ): Request {
-        $uri = new Uri('', '', 80, $path);
-        $handle = fopen('php://temp', 'w+');
-        $stream = (new StreamFactory())->createStreamFromResource($handle);
-
-        $h = new Headers();
-        foreach ($headers as $name => $value) {
-            $h->addHeader($name, $value);
-        }
-
-        return new SlimRequest($method, $uri, $h, $cookies, $serverParams, $stream);
-    }
-
-    private function getAppInstance(): App
+    #[Test]
+    #[Group('unhappy-path')]
+    #[Group('unit')]
+    #[Group('readCharacter')]
+    public function givenUseCaseThrowsExceptionWhenReadCharacterThenReturn500(): void
     {
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../../../');
-        $dotenv->load();
+        // Arrange: mock del caso de uso que lanza excepción
+        /** @var ReadCharacterUseCase&\PHPUnit\Framework\MockObject\MockObject $mockUseCase */
+        $mockUseCase = $this->createMock(ReadCharacterUseCase::class);
+        $mockUseCase->method('execute')->willThrowException(new \RuntimeException('Unexpected failure'));
 
-        $containerBuilder = new ContainerBuilder();
+        // Instanciar el controlador con el mock
+        $controller = new ReadCharacterController($mockUseCase);
 
-        $settings = require __DIR__ . '/../../../../config/definitions.php';
-        $settings($containerBuilder);
+        // Crear request y response
+        $request = $this->createRequest('GET', '/character/999');
+        $response = new Response();
 
-        $container = $containerBuilder->build();
+        // Act: ejecutar el controlador con un id ficticio
+        $result = $controller($request, $response, ['id' => 999]);
 
-        AppFactory::setContainer($container);
-        $app = AppFactory::create();
+        // Assert: comprobar que devuelve 500 y el mensaje esperado
+        $this->assertEquals(500, $result->getStatusCode());
 
-        $routes = require __DIR__ . '/../../../../config/routes.php';
-        $routes($app);
-
-        return $app;
+        $payload = json_decode((string) $result->getBody(), true);
+        $this->assertArrayHasKey('error', $payload);
+        $this->assertEquals('Failed to read character', $payload['error']);
+        $this->assertArrayHasKey('message', $payload);
+        $this->assertStringContainsString('Unexpected failure', $payload['message']);
     }
 }

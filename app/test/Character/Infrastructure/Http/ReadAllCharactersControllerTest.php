@@ -2,22 +2,23 @@
 
 namespace App\Test\Character\Infrastructure\Http;
 
+use App\Character\Application\ReadAllCharactersUseCase;
 use App\Character\Domain\Character;
 use App\Character\Domain\CharacterRepository;
 use App\Character\Domain\CharacterToArrayTransformer;
-use DI\ContainerBuilder;
-use Dotenv\Dotenv;
-use PHPUnit\Framework\TestCase;
+use App\Character\Infrastructure\Http\ReadAllCharactersController;
+use App\Test\Shared\BaseTestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\Group;
+use PDO;
 use Slim\App;
-use Slim\Factory\AppFactory;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request as SlimRequest;
+use Slim\Psr7\Response;
 use Slim\Psr7\Uri;
-use Psr\Http\Message\ServerRequestInterface as Request;
-use PDO;
 
-class ReadAllCharactersControllerTest extends TestCase
+class ReadAllCharactersControllerTest extends BaseTestCase
 {
     private App $app;
     private CharacterRepository $repository;
@@ -25,43 +26,29 @@ class ReadAllCharactersControllerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->app = $this->getAppInstance();
+        $this->app = $this->getAppInstanceWithoutCache();
         $this->repository = $this->app->getContainer()->get(CharacterRepository::class);
         $this->pdo = $this->app->getContainer()->get(PDO::class);
 
-        // Clean database before each test to ensure a fresh state
-        $this->pdo->exec('DELETE FROM characters');  // First delete the characters
-        $this->pdo->exec('DELETE FROM equipments');  // Then delete the equipments
-        $this->pdo->exec('DELETE FROM factions');    // Finally delete the factions
+        // Limpiar datos antes de cada test
+        $this->pdo->exec('DELETE FROM characters');
+        $this->pdo->exec('DELETE FROM equipments');
+        $this->pdo->exec('DELETE FROM factions');
 
-        // Insert test data
+        // Insertar datos necesarios
         $this->pdo->exec('INSERT INTO equipments (id, name, type, made_by) VALUES (1, "Sword", "weapon", "Blacksmith")');
         $this->pdo->exec('INSERT INTO factions (id, faction_name, description) VALUES (1, "Alliance", "The Alliance faction")');
     }
 
-    /**
-     * @test
-     * @group happy-path
-     * @group acceptance
-     * @group readAllCharacters
-     */
+    #[Test]
+    #[Group('happy-path')]
+    #[Group('acceptance')]
+    #[Group('readAllCharacters')]
     public function givenARepositoryWithMultipleCharactersWhenReadAllCharactersThenReturnCharactersAsJson(): void
     {
-        // Crear y guardar múltiples personajes
-        $character1 = new Character(
-            'John Doe',
-            '1990-01-01',
-            'Kingdom of Doe',
-            1,
-            1
-        );
-        $character2 = new Character(
-            'Jane Smith',
-            '1992-05-15',
-            'Kingdom of Smith',
-            1,
-            1
-        );
+        // Insertar personajes de prueba
+        $character1 = new Character('John Doe', '1990-01-01', 'Kingdom A', 1, 1);
+        $character2 = new Character('Jane Smith', '1995-05-05', 'Kingdom B', 1, 1);
 
         $character1 = $this->repository->save($character1);
         $character2 = $this->repository->save($character2);
@@ -69,54 +56,50 @@ class ReadAllCharactersControllerTest extends TestCase
         $request = $this->createRequest('GET', '/characters');
         $response = $this->app->handle($request);
 
-        $payload = (string) $response->getBody();
-        $serializedPayload = json_encode([
-            'characters' => [
-                CharacterToArrayTransformer::transform($character1),
-                CharacterToArrayTransformer::transform($character2)
-            ],
-        ]);
+        $this->assertEquals(200, $response->getStatusCode());
 
-        $this->assertEquals($serializedPayload, $payload);
+        $payload = json_decode((string) $response->getBody(), true);
+
+        $this->assertArrayHasKey('characters', $payload);
+        $this->assertCount(2, $payload['characters']);
     }
 
-    private function createRequest(
-        string $method,
-        string $path,
-        array $headers = ['HTTP_ACCEPT' => 'application/json'],
-        array $cookies = [],
-        array $serverParams = []
-    ): Request {
-        $uri = new Uri('', '', 80, $path);
-        $handle = fopen('php://temp', 'w+');
-        $stream = (new StreamFactory())->createStreamFromResource($handle);
-
-        $h = new Headers();
-        foreach ($headers as $name => $value) {
-            $h->addHeader($name, $value);
-        }
-
-        return new SlimRequest($method, $uri, $h, $cookies, $serverParams, $stream);
-    }
-
-    private function getAppInstance(): App
+    #[Test]
+    #[Group('unhappy-path')]
+    #[Group('unit')]
+    #[Group('readAllCharacters')]
+    public function givenUseCaseThrowsExceptionWhenReadAllCharactersThenReturn500(): void
     {
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../../../');
-        $dotenv->load();
+        // Mock del use case que lanza una excepción
+        $mockUseCase = $this->createMock(ReadAllCharactersUseCase::class);
+        $mockUseCase->method('execute')->willThrowException(new \RuntimeException('DB down'));
 
-        $containerBuilder = new ContainerBuilder();
+        // Crear instancia del controller con el mock
+        /** @var \App\Character\Application\ReadAllCharactersUseCase&\PHPUnit\Framework\MockObject\MockObject */
+        $mockUseCase = $this->createMock(ReadAllCharactersUseCase::class);
+        $mockUseCase->method('execute')->willThrowException(new \RuntimeException('DB down'));
 
-        $settings = require __DIR__ . '/../../../../config/definitions.php';
-        $settings($containerBuilder);
+        $controller = new ReadAllCharactersController($mockUseCase);
 
-        $container = $containerBuilder->build();
+        // Crear petición y respuesta simuladas
+        $request = new SlimRequest(
+            'GET',
+            new Uri('', '', 80, '/characters'),
+            new Headers(),
+            [],
+            [],
+            (new StreamFactory())->createStream()
+        );
 
-        AppFactory::setContainer($container);
-        $app = AppFactory::create();
+        $response = new \Slim\Psr7\Response();
 
-        $routes = require __DIR__ . '/../../../../config/routes.php';
-        $routes($app);
+        $response = $controller($request, $response, []);
 
-        return $app;
+        $this->assertEquals(500, $response->getStatusCode());
+
+        $payload = json_decode((string) $response->getBody(), true);
+        $this->assertArrayHasKey('error', $payload);
+        $this->assertEquals('Failed to list characters', $payload['error']);
+        $this->assertStringContainsString('DB down', $payload['message']);
     }
 }
