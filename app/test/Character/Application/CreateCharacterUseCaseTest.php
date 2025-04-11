@@ -10,16 +10,22 @@ use App\Character\Infrastructure\Persistence\InMemory\ArrayCharacterRepository;
 use App\Test\Character\Application\MotherObject\CreateCharacterUseCaseRequestMotherObject;
 use DomainException;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\DataProvider;
+
+/**
+ * This class is a test for the CreateCharacterUseCase.
+ * It is used to create different scenarios for the use case.
+ */
 
 class CreateCharacterUseCaseTest extends TestCase
 {
-    /**
-     * @test
-     * @group happy-path
-     * @group unit
-     * @group createCharacter
-     * @dataProvider invalidDataProvider
-     */
+    #[Test]
+    #[Group('happy-path')]
+    #[Group('unit')]
+    #[Group('createCharacter')]
+    #[DataProvider('invalidDataProvider')]
     public function givenARequestWithValidDataWhenCreateCharacterThenReturnSuccess()
     {
         $request = CreateCharacterUseCaseRequestMotherObject::valid();
@@ -48,13 +54,11 @@ class CreateCharacterUseCaseTest extends TestCase
         return $repository;
     }
 
-    /**
-     * @test
-     * @group unhappy-path
-     * @group unit
-     * @group createCharacter
-     * @dataProvider invalidDataProvider
-     */
+    #[Test]
+    #[Group('unhappy-path')]
+    #[Group('unit')]
+    #[Group('createCharacter')]
+    #[DataProvider('invalidDataProvider')]
     public function givenARequestWithInvalidDataWhenCreateCharacterThenReturnError(
         CreateCharacterUseCaseRequest $request,
         DomainException $expectedException

@@ -116,6 +116,7 @@ class CachedMySQLCharacterRepository implements CharacterRepository
     {
         $this->mySQLCharacterRepository->delete($character);
         $this->redis->del($this->getKey($character->getId()));
+        $this->redis->del($this->getKey('all'));
 
         return true;
     }

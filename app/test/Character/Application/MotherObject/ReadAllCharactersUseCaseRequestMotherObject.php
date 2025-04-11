@@ -2,8 +2,15 @@
 
 namespace App\Test\Character\Application\MotherObject;
 
-use App\Character\Domain\Character;
 use App\Character\Domain\CharacterFactory;
+
+/**
+ * This class is a mother object for the ReadAllCharactersUseCase.
+ * It is used to create different scenarios for the use case.
+ * @method static array withMultipleCharacters()
+ * @method static array withEmptyRepository()
+ * @method static array withOneCharacter()
+ */
 
 class ReadAllCharactersUseCaseRequestMotherObject
 {

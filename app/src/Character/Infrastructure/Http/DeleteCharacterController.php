@@ -13,20 +13,21 @@ class DeleteCharacterController
 
     public function __invoke(Request $request, Response $response, array $args): Response
     {
-
         $id = $args['id'];
 
         try {
             $this->useCase->execute($id);
 
             $response->getBody()->write(json_encode([
+                'success' => true,
                 'message' => 'Character correctly deleted'
             ]));
 
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(204);
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
         } catch (CharacterNotFoundException $e) {
             $response->getBody()->write(json_encode([
-                'error' => 'Character doesn\'t exist',
+                'success' => false,
+                'message' => 'Character not found'
             ]));
 
             return $response->withHeader('Content-Type', 'application/json')->withStatus(404);

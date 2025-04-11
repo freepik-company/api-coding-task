@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\App;
 use Slim\Factory\AppFactory;
+use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request as SlimRequest;
@@ -67,25 +68,15 @@ abstract class BaseTestCase extends TestCase
         array $body = [],
         array $headers = ['Content-Type' => 'application/json']
     ): ServerRequestInterface {
-        $uri = new Uri('', '', 80, $path);
-
         $streamFactory = new StreamFactory();
         $stream = $streamFactory->createStream(json_encode($body));
+        $stream->rewind();
 
-        $slimHeaders = new Headers();
-        foreach ($headers as $name => $value) {
-            $slimHeaders->addHeader($name, $value);
-        }
-
-        return new SlimRequest(
-            $method,
-            $uri,
-            $slimHeaders,
-            [],
-            [],
-            $stream
-        );
+        $serverRequestFactory = new ServerRequestFactory();
+        $request = $serverRequestFactory->createServerRequest($method, $path);
+        return $request->withBody($stream)->withHeader('Content-Type', 'application/json');
     }
+
 
     protected function createRequest(
         string $method,

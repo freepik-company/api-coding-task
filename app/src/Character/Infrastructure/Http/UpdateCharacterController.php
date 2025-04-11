@@ -30,11 +30,16 @@ class UpdateCharacterController
 
         // Validar campos requeridos
         $requiredFields = ['name', 'birth_date', 'kingdom', 'equipment_id', 'faction_id'];
+        $missingFields = [];
         foreach ($requiredFields as $field) {
             if (!isset($data[$field])) {
-                $response->getBody()->write(json_encode(['error' => "Missing required field: {$field}"]));
-                return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+                $missingFields[] = $field;
             }
+        }
+
+        if (!empty($missingFields)) {
+            $response->getBody()->write(json_encode(['error' => 'Missing required fields']));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
         try {
@@ -52,14 +57,14 @@ class UpdateCharacterController
             // Return success response
             $response->getBody()->write(json_encode([
                 'character' => CharacterToArrayTransformer::transform($useCaseResponse),
-                'message' => 'Character updated successfully'
+                'message' => 'Character updated correctly'
             ]));
 
             return $response->withHeader('content-Type', 'application/json')->withStatus(200);
         } catch (\Exception $e) {
             $response->getBody()->write(json_encode([
                 'error' => 'Error updating character',
-                'message' => $e->getMessage()
+                'message' => 'Unexpected error'
             ]));
 
             return $response->withHeader('Content-Type', 'application/json')->withStatus(500);

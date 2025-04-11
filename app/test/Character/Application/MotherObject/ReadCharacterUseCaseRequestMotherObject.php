@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * This class is a mother object for the ReadCharacterUseCase.
+ * It is used to create different scenarios for the use case.
+ * @method static Character valid()
+ * @method static Character withInvalidId()
+ */
+
 namespace App\Test\Character\Application\MotherObject;
 
 use App\Character\Domain\Character;

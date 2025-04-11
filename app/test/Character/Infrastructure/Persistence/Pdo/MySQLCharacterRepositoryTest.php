@@ -213,6 +213,70 @@ class MySQLCharacterRepositoryTest extends TestCase
         $this->assertEquals(1, $foundCharacter->getFactionId());
     }
 
+    /**
+     * @test
+     * @group integration
+     * Test that verifies the MySQLCharacterToArrayTransformer behavior through the repository
+     */
+    public function givenACharacterWhenSaveThenTransformToArrayCorrectly(): void
+    {
+        // Arrange
+        $pdo = $this->createPdoConnection();
+
+        // Create equipment and faction first
+        $pdo->exec('INSERT INTO equipments (id, name, type, made_by) VALUES (1, "Sword", "weapon", "Blacksmith")');
+        $pdo->exec('INSERT INTO factions (id, faction_name, description) VALUES (1, "Alliance", "The Alliance faction")');
+
+        // Create a character without ID
+        $character = new Character(
+            'John Doe',
+            '1990-01-01',
+            'Kingdom of Doe',
+            1,
+            1
+        );
+
+        // Act
+        $savedCharacter = $this->repository->save($character);
+
+        // Assert
+        // Verify that the character was saved with all fields
+        $stmt = $pdo->prepare('SELECT * FROM characters WHERE id = :id');
+        $stmt->execute(['id' => $savedCharacter->getId()]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $this->assertEquals('John Doe', $data['name']);
+        $this->assertEquals('1990-01-01', $data['birth_date']);
+        $this->assertEquals('Kingdom of Doe', $data['kingdom']);
+        $this->assertEquals(1, $data['equipment_id']);
+        $this->assertEquals(1, $data['faction_id']);
+        $this->assertNotNull($data['id']);
+
+        // Now test with a character that has an ID
+        $characterWithId = new Character(
+            'Jane Doe',
+            '1992-02-02',
+            'Kingdom of Jane',
+            1,
+            1,
+            $savedCharacter->getId() // Use the same ID to test update
+        );
+
+        // Act
+        $updatedCharacter = $this->repository->save($characterWithId);
+
+        // Assert
+        $stmt->execute(['id' => $updatedCharacter->getId()]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $this->assertEquals('Jane Doe', $data['name']);
+        $this->assertEquals('1992-02-02', $data['birth_date']);
+        $this->assertEquals('Kingdom of Jane', $data['kingdom']);
+        $this->assertEquals(1, $data['equipment_id']);
+        $this->assertEquals(1, $data['faction_id']);
+        $this->assertEquals($savedCharacter->getId(), $data['id']);
+    }
+
     // This is a helper method to create a PDO connection
     private function createPdoConnection(): PDO
     {
