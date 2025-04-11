@@ -24,8 +24,7 @@ class CachedMySQLCharacterRepository implements CharacterRepository
         private MySQLCharacterRepository $mySQLCharacterRepository,
         private Redis $redis,
         private ?LoggerInterface $logger
-    ) {
-    }
+    ) {}
 
     /**
      * This method returns the key for the cache.
@@ -87,7 +86,7 @@ class CachedMySQLCharacterRepository implements CharacterRepository
      */
     public function save(Character $character): Character
     {
-        if ($character->getId() !== null){
+        if ($character->getId() !== null) {
             //Update
             $updatedCharacter = $this->mySQLCharacterRepository->update($character);
             $this->redis->set($this->getKey($updatedCharacter->getId()), serialize($updatedCharacter));
@@ -97,14 +96,14 @@ class CachedMySQLCharacterRepository implements CharacterRepository
             }
             return $updatedCharacter;
         }
-            // Insert ¿CALENTAR CACHE?
-            $newCharacter = $this->mySQLCharacterRepository->save($character);
-            $this->redis->set($this->getKey($newCharacter->getId()), serialize($newCharacter));
-            $this->redis->del($this->getKey('all'));
-            if ($newCharacter) {
-                $this->logger->info('Character saved in cache');
-            }
-            return $newCharacter;
+        // Insert ¿CALENTAR CACHE?
+        $newCharacter = $this->mySQLCharacterRepository->save($character);
+        $this->redis->set($this->getKey($newCharacter->getId()), serialize($newCharacter));
+        $this->redis->del($this->getKey('all'));
+        if ($newCharacter) {
+            $this->logger->info('Character saved in cache');
+        }
+        return $newCharacter;
     }
 
 

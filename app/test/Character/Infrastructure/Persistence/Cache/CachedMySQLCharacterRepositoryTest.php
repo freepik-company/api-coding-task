@@ -54,6 +54,7 @@ class CachedMySQLCharacterRepositoryTest extends TestCase
 
 
     #[Test]
+    #[Group('integration')]
     #[Group('cache')]
     public function testCharacterIsCachedAfterSave(): void
     {
@@ -68,19 +69,150 @@ class CachedMySQLCharacterRepositoryTest extends TestCase
     }
 
     #[Test]
+    #[Group('integration')]
     #[Group('cache')]
-    public function testFindReturnCharacterFromCache(): void
+    public function testFindCachesResultWhenCacheMissOccurs(): void
+    {
+        $character = new Character("Cache Miss", "1991-02-02", "España", $this->equipmentId, $this->factionId);
+        $saved = $this->repository->save($character);
+
+        // Borramos el caché manualmente
+        $key = 'App\Character\Infrastructure\Persistence\Cache\CachedMySQLCharacterRepository:' . $saved->getId();
+        $this->redis->del($key);
+
+        // Confirmamos que no está en Redis antes
+        $this->assertFalse($this->redis->get($key));
+
+        // Esto debería obtenerlo desde MySQL y cachearlo
+        $fetched = $this->repository->find($saved->getId());
+
+        $this->assertEquals($saved, $fetched);
+        $this->assertNotFalse($this->redis->get($key)); // Confirmamos que se cacheó después
+    }
+
+    #[Test]
+    #[Group('integration')]
+    #[Group('cache')]
+    public function testFindReturnsNullAndCachesItIfNotFound(): void
+    {
+        $nonExistentId = 99999;
+
+        try {
+            $result = $this->repository->find($nonExistentId);
+        } catch (\App\Character\Infrastructure\Persistence\Pdo\Exception\CharacterNotFoundException $e) {
+            $this->assertSame('Character not found', $e->getMessage());
+
+            $key = 'App\Character\Infrastructure\Persistence\Cache\CachedMySQLCharacterRepository:' . $nonExistentId;
+            $this->assertFalse($this->redis->get($key)); // Asegura que no se cachea
+
+            return; // Test pasó, salimos
+        }
+        $this->fail('Expected CharacterNotFoundException was not thrown');
+    }
+
+    #[Test]
+    #[Group('integration')]
+    #[Group('cache')]
+    public function testSaveUpdateDeletesFindAllCache(): void
     {
         $character = new Character("John Doe", "1990-01-01", "Spain", $this->equipmentId, $this->factionId);
         $saved = $this->repository->save($character);
 
-        // First call and save to cache
-        $this->repository->find($saved->getId());
+        $this->repository->findAll(); // Calienta cache
+        $allKey = 'App\Character\Infrastructure\Persistence\Cache\CachedMySQLCharacterRepository:all';
+        $this->assertNotFalse($this->redis->get($allKey));
 
-        // Second call should return from cache
-        $cached = $this->repository->find($saved->getId());
+        // Simula modificación y re-save (update)
+        $refClass = new \ReflectionClass($saved);
+        $nameProp = $refClass->getProperty('name');
+        $nameProp->setAccessible(true);
+        $nameProp->setValue($saved, "Updated Name");
 
-        $this->assertEquals($saved, $cached);
+        $this->repository->save($saved);
+
+        $this->assertFalse($this->redis->get($allKey)); // cache invalidado
+    }
+
+    #[Test]
+    #[Group('integration')]
+    #[Group('cache')]
+    public function testFindAllReturnsFromCacheAndLogsIt(): void
+    {
+        $loggedMessages = [];
+
+        $mock = $this->createMock(\Psr\Log\LoggerInterface::class);
+        $mock->method('info')->willReturnCallback(function (string $message) use (&$loggedMessages) {
+            $loggedMessages[] = $message;
+        });
+
+        /** @var \Psr\Log\LoggerInterface $logger */
+        $logger = $mock;
+
+        $repo = new CachedMySQLCharacterRepository(
+            new \App\Character\Infrastructure\Persistence\Pdo\MySQLCharacterRepository(
+                new \PDO("mysql:host=db;dbname=test", "root", "root")
+            ),
+            $this->redis,
+            $logger
+        );
+
+        $character = new Character("FindAll Cached", "2000-01-01", "España", $this->equipmentId, $this->factionId);
+        $repo->save($character);
+
+        $repo->findAll(); // cache miss → se guarda en Redis
+
+        $repo->findAll(); // cache hit → debe loguear
+
+        $this->assertContains('Getting all characters from cache', $loggedMessages);
+    }
+
+
+    #[Test]
+    #[Group('integration')]
+    #[Group('cache')]
+    public function testDeleteRemovesFromCache(): void
+    {
+        $character = new Character("John Doe", "1990-01-01", "Spain", $this->equipmentId, $this->factionId);
+        $saved = $this->repository->save($character);
+
+        $key = 'App\Character\Infrastructure\Persistence\Cache\CachedMySQLCharacterRepository:' . $saved->getId();
+        $this->assertNotFalse($this->redis->get($key));
+
+        $this->repository->delete($saved);
+
+        $this->assertFalse($this->redis->get($key));
+    }
+
+    #[Test]
+    #[Group('integration')]
+    #[Group('cache')]
+    public function testLoggerIsCalledOnCacheHit(): void
+    {
+        $mensajesLog = [];
+
+        $mock = $this->createMock(\Psr\Log\LoggerInterface::class);
+        $mock->method('info')->willReturnCallback(function (string $mensaje, array $contexto = []) use (&$mensajesLog) {
+            $mensajesLog[] = $mensaje;
+        });
+
+        /** @var \Psr\Log\LoggerInterface $logger */
+        $logger = $mock;
+
+        $repo = new CachedMySQLCharacterRepository(
+            new \App\Character\Infrastructure\Persistence\Pdo\MySQLCharacterRepository(
+                new \PDO("mysql:host=db;dbname=test", "root", "root")
+            ),
+            $this->redis,
+            $logger
+        );
+
+        $character = new Character("John Doe", "1990-01-01", "Spain", $this->equipmentId, $this->factionId);
+        $saved = $repo->save($character); // esto loguea "Character saved in cache"
+
+        $repo->find($saved->getId()); // cache miss → no loguea "found"
+        $repo->find($saved->getId()); // cache hit → debe loguear "Character found in cache"
+
+        $this->assertContains('Character found in cache', $mensajesLog);
     }
 
     #[After]

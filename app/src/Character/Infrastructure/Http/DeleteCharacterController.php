@@ -23,7 +23,7 @@ class DeleteCharacterController
                 'message' => 'Character correctly deleted'
             ]));
 
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(204);
         } catch (CharacterNotFoundException $e) {
             $response->getBody()->write(json_encode([
                 'error' => 'Character doesn\'t exist',
