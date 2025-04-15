@@ -12,6 +12,14 @@ use App\Equipment\Domain\EquipmentFactory;
  */
 class ReadAllEquipmentUseCaseRequestMotherObject
 {
+
+    public static function valid(): array
+    {
+        return [
+            EquipmentFactory::build('Anduril', 'Weapon', 'Elfs'),
+        ];
+    }
+
     public static function withMultipleEquipment(): array
     {
         return [

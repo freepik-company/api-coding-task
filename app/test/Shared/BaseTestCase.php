@@ -15,6 +15,8 @@ use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request as SlimRequest;
 use Slim\Psr7\Uri;
+use PHPUnit\Framework\MockObject\MockObject;
+
 
 abstract class BaseTestCase extends TestCase
 {
@@ -95,5 +97,31 @@ abstract class BaseTestCase extends TestCase
         }
 
         return new SlimRequest($method, $uri, $h, $cookies, $serverParams, $stream);
+    }
+
+    /**
+     * Crea un mock de repositorio con `find()` que devuelve entidades por ID.
+     *
+     * @template T of object
+     * @param class-string $repositoryInterface Ej: EquipmentRepository::class
+     * @param T[] $entities Entidades que implementen getId()
+     * @return T&MockObject
+     */
+    protected function mockRepositoryWithFind(string $repositoryInterface, array $entities): object
+    {
+        /** @var MockObject $repository */
+        $repository = $this->createMock($repositoryInterface);
+
+        $repository->method('find')
+            ->willReturnCallback(function (int $id) use ($entities) {
+                foreach ($entities as $entity) {
+                    if ($entity->getId() === $id) {
+                        return $entity;
+                    }
+                }
+                return null;
+            });
+
+        return $repository;
     }
 }

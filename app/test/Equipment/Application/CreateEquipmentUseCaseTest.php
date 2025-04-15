@@ -50,14 +50,14 @@ class CreateEquipmentUseCaseTest extends TestCase
     #[Group('unit')]
     #[Group('createEquipment')]
     #[DataProvider('invalidDataProvider')]
-    public function givenARequestWithInvalidDataWhenCreateEquipmentThenReturnError()
+    public function givenARequestWithInvalidDataWhenCreateEquipmentThenReturnError($request, $expectedExceptcion)
     {
-        $request = CreateEquipmentUseCaseRequestMotherObject::invalid();
         $sut = new CreateEquipmentUseCase(
             $this->mockEquipmentRepository([])
         );
 
         $this->expectException(EquipmentValidationException::class);
+        $this->expectExceptionMessage($expectedExceptcion->getMessage());
         $sut->execute($request);
     }
 
