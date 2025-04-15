@@ -4,9 +4,13 @@ namespace App\Equipment\Application;
 
 use App\Equipment\Domain\Equipment;
 use App\Equipment\Domain\EquipmentRepository;
+use App\Equipment\Infrastructure\Persistence\Pdo\Exception\EquipmentNotFoundException;
 
 /**
  * This use case is used to update an equipment
+ * @throws EquipmentNotFoundException if the equipment is not found
+ * @throws InvalidRequestException if the request is invalid
+ *
  */
 
 class UpdateEquipmentUseCase
@@ -21,7 +25,7 @@ class UpdateEquipmentUseCase
         $oldEquipment = $this->repository->find($request->getId());
 
         if (!$oldEquipment) {
-            throw new \Exception('Equipment not found');
+            throw new EquipmentNotFoundException('Equipment not found');
         }
 
         $updatedEquipment = new Equipment(

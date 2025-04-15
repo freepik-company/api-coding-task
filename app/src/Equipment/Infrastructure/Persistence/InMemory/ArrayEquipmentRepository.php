@@ -5,6 +5,7 @@ namespace App\Equipment\Infrastructure\Persistence\InMemory;
 use App\Equipment\Domain\Equipment;
 use App\Equipment\Domain\EquipmentFactory;
 use App\Equipment\Domain\EquipmentRepository;
+use App\Equipment\Infrastructure\Persistence\Pdo\Exception\EquipmentNotFoundException;
 
 /**
  * ArrayEquipmentRepository is a class that is used to store equipment in an array.
@@ -22,6 +23,7 @@ class ArrayEquipmentRepository implements EquipmentRepository
     public function find(int $id): ?Equipment
     {
         if (!isset($this->equipment[$id])) {
+            throw EquipmentNotFoundException::build($id);
         }
 
         return $this->equipment[$id];

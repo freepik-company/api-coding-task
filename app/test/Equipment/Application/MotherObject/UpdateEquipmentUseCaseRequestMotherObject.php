@@ -22,7 +22,7 @@ class UpdateEquipmentUseCaseRequestMotherObject
             id: 1
         );
     }
-
+    // return an array with the valid request, to simulate the request from the controller (JSON)
     public static function validAsArray(): array
     {
         return [
@@ -31,5 +31,15 @@ class UpdateEquipmentUseCaseRequestMotherObject
             'made_by' => 'Elfs',
             'id' => 1
         ];
+    }
+
+    public static function invalid(): UpdateEquipmentUseCaseRequest
+    {
+        return new UpdateEquipmentUseCaseRequest(
+            name: 'Anduril',
+            type: 'Weapon',
+            made_by: 'Elfs',
+            id: 999
+        );
     }
 }

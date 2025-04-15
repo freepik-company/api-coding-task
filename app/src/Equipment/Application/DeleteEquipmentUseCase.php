@@ -11,7 +11,7 @@ class DeleteEquipmentUseCase
         private EquipmentRepository $repository
     ) {}
 
-    public function execute(string $id): void
+    public function execute(int $id): void
     {
         $equipment = $this->repository->find($id);
 

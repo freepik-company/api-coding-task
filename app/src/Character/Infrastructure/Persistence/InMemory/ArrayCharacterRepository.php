@@ -16,7 +16,7 @@ class ArrayCharacterRepository implements CharacterRepository
     public function find(int $id): ?Character
     {
         if (!isset($this->characters[$id])) {
-            throw CharacterNotFoundException::build();
+            throw CharacterNotFoundException::build($id);
         }
         return $this->characters[$id];
     }
