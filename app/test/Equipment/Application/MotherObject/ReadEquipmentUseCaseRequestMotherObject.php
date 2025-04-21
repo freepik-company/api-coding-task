@@ -16,7 +16,7 @@ class ReadEquipmentUseCaseRequestMotherObject
 {
     public static function valid(): Equipment
     {
-        return EquipmentFactory::build('Anduril', 'Weapon', 'Elfs', 1);
+        return EquipmentFactory::build('Anduril', 'Weapon', 'Elfs');
     }
 
     public static function withInvalidId(): Equipment

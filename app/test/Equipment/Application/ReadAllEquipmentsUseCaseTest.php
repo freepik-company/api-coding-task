@@ -2,21 +2,20 @@
 
 namespace App\Test\Equipment\Application;
 
-use App\Equipment\Application\ReadAllEquipmentUseCase;
+use App\Equipment\Application\ReadAllEquipmentsUseCase;
 use App\Equipment\Domain\EquipmentRepository;
-use App\Equipment\Infrastructure\Persistence\InMemory\ArrayEquipmentRepository;
-use App\Test\Equipment\Application\MotherObject\ReadAllEquipmentUseCaseRequestMotherObject;
+use App\Test\Equipment\Application\MotherObject\ReadAllEquipmentsUseCaseRequestMotherObject;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\DataProvider;
 use App\Test\Shared\BaseTestCase;
 
-class ReadAllEquipmentUseCaseTest extends BaseTestCase
+class ReadAllEquipmentsUseCaseTest extends BaseTestCase
 {
 
     /** @var EquipmentRepository|\PHPUnit\Framework\MockObject\MockObject */
     private $repository;
-    private ReadAllEquipmentUseCase $useCase;
+    private ReadAllEquipmentsUseCase $useCase;
 
     protected function setUp(): void
     {
@@ -24,7 +23,7 @@ class ReadAllEquipmentUseCaseTest extends BaseTestCase
         $repository = $this->createMock(EquipmentRepository::class);
         // @phpstan-ignore-next-line
         $this->repository = $repository;
-        $this->useCase = new ReadAllEquipmentUseCase($this->repository);
+        $this->useCase = new ReadAllEquipmentsUseCase($this->repository);
     }
 
 
@@ -75,13 +74,13 @@ class ReadAllEquipmentUseCaseTest extends BaseTestCase
     {
         return [
             'empty repository' => [
-                ReadAllEquipmentUseCaseRequestMotherObject::withEmptyRepository()
+                ReadAllEquipmentsUseCaseRequestMotherObject::withEmptyRepository()
             ],
             'one equipment' => [
-                ReadAllEquipmentUseCaseRequestMotherObject::valid()
+                ReadAllEquipmentsUseCaseRequestMotherObject::valid()
             ],
             'multiple equipment' => [
-                ReadAllEquipmentUseCaseRequestMotherObject::withMultipleEquipment()
+                ReadAllEquipmentsUseCaseRequestMotherObject::withMultipleEquipment()
             ],
         ];
     }

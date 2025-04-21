@@ -5,7 +5,6 @@ namespace App\Test\Character\Infrastructure\Http;
 use App\Character\Application\ReadAllCharactersUseCase;
 use App\Character\Domain\Character;
 use App\Character\Domain\CharacterRepository;
-use App\Character\Domain\CharacterToArrayTransformer;
 use App\Character\Infrastructure\Http\ReadAllCharactersController;
 use App\Test\Shared\BaseTestCase;
 use PHPUnit\Framework\Attributes\Test;
@@ -15,7 +14,6 @@ use Slim\App;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request as SlimRequest;
-use Slim\Psr7\Response;
 use Slim\Psr7\Uri;
 
 class ReadAllCharactersControllerTest extends BaseTestCase

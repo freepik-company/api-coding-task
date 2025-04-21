@@ -10,11 +10,7 @@ use App\Character\Infrastructure\Http\ReadCharacterController;
 use App\Test\Shared\BaseTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\Group;
-use Slim\Psr7\Factory\StreamFactory;
-use Slim\Psr7\Headers;
-use Slim\Psr7\Request as SlimRequest;
 use Slim\Psr7\Response;
-use Slim\Psr7\Uri;
 
 class ReadCharacterControllerTest extends BaseTestCase
 {

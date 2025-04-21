@@ -45,21 +45,21 @@ class CreateCharacterController
                     $data['faction_id']
                 )
             );
+
+            // Return success response
+            $response->getBody()->write(json_encode([
+                'character' => CharacterToArrayTransformer::transform($useCaseResponse->getCharacter()),
+                'message' => 'Character created successfully'
+            ]));
+
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
         } catch (\Exception $e) {
             $response->getBody()->write(json_encode([
                 'error' => 'Error creating character',
                 'message' => $e->getMessage()
             ]));
 
-
             return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
         }
-        // Return success response
-        $response->getBody()->write(json_encode([
-            'character' => CharacterToArrayTransformer::transform($useCaseResponse->getCharacter()),
-            'message' => 'Character created successfully'
-        ]));
-
-        return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
     }
 }

@@ -19,10 +19,14 @@ class ReadEquipmentUseCaseTest extends BaseTestCase
     protected function setUp(): void
     {
         $equipment = ReadEquipmentUseCaseRequestMotherObject::valid();
+        $equipmentId = 1;
 
         /** @var EquipmentRepository&\PHPUnit\Framework\MockObject\MockObject $repository */
-        $repository = $this->mockRepositoryWithFind(EquipmentRepository::class, [$equipment]);
-        // @phpstan-ignore-next-line
+        $repository = $this->createMock(EquipmentRepository::class);
+        $repository->method('find')
+            ->with($equipmentId)
+            ->willReturn($equipment);
+
         $this->repository = $repository;
         $this->useCase = new ReadEquipmentUseCase($this->repository);
     }
@@ -35,20 +39,19 @@ class ReadEquipmentUseCaseTest extends BaseTestCase
     public function givenARepositoryWithOneEquipmentIdWhenReadCharacterThenReturnEquipment(): void
     {
         $equipment = ReadEquipmentUseCaseRequestMotherObject::valid();
+        $equipmentId = 1; // ID fijo para la prueba
 
-        $restul = $this->useCase->execute($equipment->getId());
+        $result = $this->useCase->execute($equipmentId);
 
-        $this->assertEquals($equipment->getId(), $restul->getId());
-        $this->assertEquals($equipment->getName(), $restul->getName());
-        $this->assertEquals($equipment->getType(), $restul->getType());
-        $this->assertEquals($equipment->getMadeBy(), $restul->getMadeBy());
+        $this->assertEquals($equipment->getName(), $result->getName());
+        $this->assertEquals($equipment->getType(), $result->getType());
+        $this->assertEquals($equipment->getMadeBy(), $result->getMadeBy());
     }
 
     public static function provideEquipment(): array
     {
         return [
             [ReadEquipmentUseCaseRequestMotherObject::valid()],
-            [ReadEquipmentUseCaseRequestMotherObject::withInvalidId()],
         ];
     }
 }

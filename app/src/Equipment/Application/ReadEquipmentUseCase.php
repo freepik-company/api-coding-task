@@ -4,6 +4,7 @@ namespace App\Equipment\Application;
 
 use App\Equipment\Domain\Equipment;
 use App\Equipment\Domain\EquipmentRepository;
+use App\Equipment\Infrastructure\Persistence\Pdo\Exception\EquipmentNotFoundException;
 
 /**
  * ReadEquipmentUseCase is a class that is used to read an equipment.
@@ -18,6 +19,12 @@ class ReadEquipmentUseCase
 
     public function execute(int $id): Equipment
     {
-        return $this->repository->find($id);
+        $equipment = $this->repository->find($id);
+
+        if (!$equipment) {
+            throw EquipmentNotFoundException::build($id);
+        }
+
+        return $equipment;
     }
 }

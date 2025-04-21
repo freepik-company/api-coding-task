@@ -37,7 +37,7 @@ class ArrayFactionRepository implements FactionRepository
 
         $newId = count($this->factions) + 1;
         $faction = FactionFactory::build(
-            $faction->getName(),
+            $faction->getFactionName(),
             $faction->getDescription(),
             $newId
         );

@@ -33,6 +33,15 @@ class CreateEquipmentUseCaseRequestMotherObject
         );
     }
 
+    public static function withInvalidNameAsArray(): array
+    {
+        return [
+            'name' => '',
+            'type' => 'Weapon',
+            'made_by' => 'Elfs'
+        ];
+    }
+
     public static function withInvalidType(): CreateEquipmentUseCaseRequest
     {
         return new CreateEquipmentUseCaseRequest(
@@ -49,5 +58,21 @@ class CreateEquipmentUseCaseRequestMotherObject
             'Weapon',
             '',
         );
+    }
+
+    public static function validAsArray(): array
+    {
+        return [
+            'name' => 'Anduril',
+            'type' => 'Weapon',
+            'made_by' => 'Elfs',
+        ];
+    }
+    public static function missingNameAsArray(): array
+    {
+        return [
+            'type' => 'Weapon',
+            'made_by' => 'Elfs',
+        ];
     }
 }

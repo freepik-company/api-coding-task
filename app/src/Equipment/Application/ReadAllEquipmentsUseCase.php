@@ -4,7 +4,7 @@ namespace App\Equipment\Application;
 
 use App\Equipment\Domain\EquipmentRepository;
 
-class ReadAllEquipmentUseCase
+class ReadAllEquipmentsUseCase
 {
     public function __construct(
         private EquipmentRepository $repository

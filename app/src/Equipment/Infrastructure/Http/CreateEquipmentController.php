@@ -13,19 +13,31 @@ class CreateEquipmentController
 
     public function __invoke(Request $request, Response $response, array $args): Response
     {
-        $data = $request->getParsedBody();
-        $data = json_decode(file_get_contents('php://input'), true);
+        try {
+            // ⚠️ Leer el body y parsear JSON manualmente (NO usar getParsedBody)
+            $rawBody = (string) $request->getBody();
+            $data = json_decode($rawBody, true);
 
-        // Validate required fields
-        $requiredFields = ['name', 'type', 'made_by'];
-        foreach ($requiredFields as $field) {
-            if (!isset($data[$field])) {
-                $response->getBody()->write(json_encode(['error' => "Missing required field: {$field}"]));
+            // ⚠️ JSON mal formado
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $response->getBody()->write(json_encode([
+                    'error' => 'Invalid JSON',
+                    'message' => json_last_error_msg()
+                ]));
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
             }
-        }
 
-        try {
+            // ⚠️ Validar campos obligatorios y no vacíos
+            $requiredFields = ['name', 'type', 'made_by'];
+            foreach ($requiredFields as $field) {
+                if (!isset($data[$field]) || trim($data[$field]) === '') {
+                    $response->getBody()->write(json_encode([
+                        'error' => ucfirst("{$field} is required")
+                    ]));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+                }
+            }
+
             $request = new CreateEquipmentUseCaseRequest(
                 $data['name'],
                 $data['type'],
@@ -34,15 +46,20 @@ class CreateEquipmentController
 
             $equipment = $this->useCase->execute($request);
 
-            //Return success response
             $response->getBody()->write(json_encode([
-                'message' => 'Equipment created successfully'
+                'equipment' => [
+                    'id' => $equipment->getId(),
+                    'name' => $equipment->getName(),
+                    'type' => $equipment->getType(),
+                    'made_by' => $equipment->getMadeBy()
+                ]
             ]));
 
             return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
         } catch (\Exception $e) {
             $response->getBody()->write(json_encode([
-                'error' => $e->getMessage()
+                'error' => 'Unexpected error',
+                'message' => $e->getMessage()
             ]));
 
             return $response->withHeader('Content-Type', 'application/json')->withStatus(500);

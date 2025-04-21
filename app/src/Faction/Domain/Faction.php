@@ -2,6 +2,8 @@
 
 namespace App\Faction\Domain;
 
+use App\Faction\Domain\Exception\FactionValidationException;
+
 class Faction
 {
     // Properties
@@ -15,6 +17,18 @@ class Faction
         string $description,
         ?int $id = null
     ) {
+        if (empty($faction_name)) {
+            throw FactionValidationException::factionNameRequired();
+        }
+
+        if (empty($description)) {
+            throw FactionValidationException::factionDescriptionRequired();
+        }
+
+        if ($id !== null && $id <= 0) {
+            throw FactionValidationException::idNonPositive();
+        }
+
         $this->faction_name = $faction_name;
         $this->description = $description;
         $this->id = $id;

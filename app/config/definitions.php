@@ -49,10 +49,24 @@ return function (ContainerBuilder $containerBuilder) {
 
     $containerBuilder->addDefinitions([
         PDO::class => function () {
+            $env = $_ENV['APP_ENV'] ?? 'dev';
+
+            if ($env === 'test') {
+                $host = $_ENV['DB_TEST_HOST'] ?? 'db';
+                $db   = $_ENV['DB_TEST_NAME'] ?? 'test';
+                $user = $_ENV['DB_TEST_USER'] ?? 'root';
+                $pass = $_ENV['DB_TEST_PASSWORD'] ?? 'root';
+            } else {
+                $host = $_ENV['DB_HOST'] ?? 'db';
+                $db   = $_ENV['DB_NAME'] ?? 'lotr';
+                $user = $_ENV['DB_USER'] ?? 'root';
+                $pass = $_ENV['DB_PASSWORD'] ?? 'root';
+            }
+
             $conn = new PDO(
-                'mysql:host=' . $_ENV['DB_HOST'] . ';dbname=' . $_ENV['DB_NAME'],
-                $_ENV['DB_USER'],
-                $_ENV['DB_PASSWORD'],
+                "mysql:host=$host;dbname=$db;charset=utf8mb4",
+                $user,
+                $pass
             );
 
 

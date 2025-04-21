@@ -27,3 +27,6 @@ $routes($app);
 
 // Add middleware to parse the body of the request as JSON
 $app->add(new BodyParsingMiddleware());
+
+// Run the application
+$app->run();

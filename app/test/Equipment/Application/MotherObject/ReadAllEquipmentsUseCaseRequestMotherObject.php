@@ -5,12 +5,12 @@ namespace App\Test\Equipment\Application\MotherObject;
 use App\Equipment\Domain\EquipmentFactory;
 
 /**
- * This class is a mother object for the ReadAllEquipmentUseCase.
+ * This class is a mother object for the ReadAllEquipmentsUseCase.
  * It is used to create different scenarios for the use case.
  * @method static array withMultipleEquipment()
  * @method static array withEmptyRepository()
  */
-class ReadAllEquipmentUseCaseRequestMotherObject
+class ReadAllEquipmentsUseCaseRequestMotherObject
 {
 
     public static function valid(): array

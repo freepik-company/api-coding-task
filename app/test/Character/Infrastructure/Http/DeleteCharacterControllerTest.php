@@ -7,15 +7,9 @@ use App\Character\Domain\Character;
 use App\Character\Domain\CharacterRepository;
 use App\Character\Infrastructure\Http\DeleteCharacterController;
 use App\Character\Infrastructure\Persistence\InMemory\ArrayCharacterRepository;
-use App\Character\Infrastructure\Persistence\Pdo\Exception\CharacterNotFoundException;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;
-use Psr\Http\Message\ServerRequestInterface;
-use Slim\Psr7\Factory\ServerRequestFactory;
-use Slim\Psr7\Headers;
-use Slim\Psr7\Stream;
-use Slim\Psr7\Uri;
+use PHPUnit\Framework\Attributes\Group;
 use App\Test\Shared\BaseTestCase;
 
 class DeleteCharacterControllerTest extends BaseTestCase
@@ -32,6 +26,8 @@ class DeleteCharacterControllerTest extends BaseTestCase
 
     #[Test]
     #[TestDox('Given a character id when delete character then return 200')]
+    #[Group('integration')]
+    #[Group('deleteCharacter')]
     public function givenACharacterIdWhenDeleteCharacterThenReturn200()
     {
         $character = new Character(
@@ -55,7 +51,9 @@ class DeleteCharacterControllerTest extends BaseTestCase
     }
 
     #[Test]
+    #[Group('deleteCharacter')]
     #[TestDox('Given a character id when delete character then return 404')]
+    // TestDox es una anotación que permite dar un nombre al test
     public function givenANonExistentCharacterIdWhenDeleteCharacterThenReturn404()
     {
         $request = $this->createRequest('DELETE', '/characters/999');

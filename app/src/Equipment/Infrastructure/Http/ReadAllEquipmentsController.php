@@ -2,15 +2,15 @@
 
 namespace App\Equipment\Infrastructure\Http;
 
-use App\Equipment\Application\ReadAllEquipmentUseCase;
+use App\Equipment\Application\ReadAllEquipmentsUseCase;
 use App\Equipment\Domain\EquipmentToArrayTransformer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class ReadAllEquipmentController
+class ReadAllEquipmentsController
 {
     public function __construct(
-        private ReadAllEquipmentUseCase $useCase
+        private ReadAllEquipmentsUseCase $useCase
     ) {}
 
     public function __invoke(Request $request, Response $response, array $args): Response

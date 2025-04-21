@@ -7,7 +7,7 @@ use App\Character\Infrastructure\Http\ReadCharacterController;
 use App\Character\Infrastructure\Http\UpdateCharacterController;
 use App\Equipment\Infrastructure\Http\CreateEquipmentController;
 use App\Equipment\Infrastructure\Http\DeleteEquipmentController;
-use App\Equipment\Infrastructure\Http\ReadAllEquipmentController;
+use App\Equipment\Infrastructure\Http\ReadAllEquipmentsController;
 use App\Equipment\Infrastructure\Http\ReadEquipmentController;
 use App\Equipment\Infrastructure\Http\UpdateEquipmentController;
 use App\Faction\Infrastructure\Http\CreateFactionController;
@@ -39,7 +39,7 @@ return function (App $app) {
     $app->post('/equipment', CreateEquipmentController::class);
     $app->get('/equipment/{id}', ReadEquipmentController::class);
     $app->put('/equipment/{id}', UpdateEquipmentController::class);
-    $app->get('/equipments', ReadAllEquipmentController::class);
+    $app->get('/equipments', ReadAllEquipmentsController::class);
     $app->delete('/equipment/{id}', DeleteEquipmentController::class);
 
     // Add routes for the faction resource
@@ -48,6 +48,4 @@ return function (App $app) {
     $app->get('/faction/{id}', ReadFactionController::class);
     $app->put('/faction/{id}', UpdateFactionController::class);
     $app->delete('/faction/{id}', DeleteFactionController::class);
-
-    $app->run();
 };

@@ -16,6 +16,7 @@ use Slim\Psr7\Headers;
 use Slim\Psr7\Request as SlimRequest;
 use Slim\Psr7\Uri;
 use PHPUnit\Framework\MockObject\MockObject;
+use PDO;
 
 
 abstract class BaseTestCase extends TestCase
@@ -32,19 +33,25 @@ abstract class BaseTestCase extends TestCase
 
     private function buildAppInstance(bool $cacheEnabled): App
     {
+        // Limpiar variables de entorno existentes
+        unset($_ENV['APP_ENV'], $_SERVER['APP_ENV']);
+        putenv('APP_ENV');
+
+        // Establecer modo de prueba
+        putenv('APP_ENV=test');
+        $_ENV['APP_ENV'] = 'test';
+        $_SERVER['APP_ENV'] = 'test';
+
+        // Cargar .env
+        $dotenv = Dotenv::createImmutable(dirname(__DIR__, 2));
+        $dotenv->load();
+
         // Forzar variable de entorno
         putenv('CACHE_ENABLED=' . ($cacheEnabled ? '1' : '0'));
         $_ENV['CACHE_ENABLED'] = $cacheEnabled ? '1' : '0';
         $_SERVER['CACHE_ENABLED'] = $cacheEnabled ? '1' : '0';
 
-        // Cargar .env solo si no está cargado
-        if (!isset($_ENV['APP_ENV'])) {
-            $dotenv = Dotenv::createImmutable(dirname(__DIR__, 2)); // Ruta corregida
-            $dotenv->load();
-        }
-
         $containerBuilder = new ContainerBuilder();
-
         $definitions = require dirname(__DIR__, 2) . '/config/definitions.php';
         $definitions($containerBuilder);
 
@@ -56,10 +63,8 @@ abstract class BaseTestCase extends TestCase
         $routes = require dirname(__DIR__, 2) . '/config/routes.php';
         $routes($app);
 
-        foreach ($app->getRouteCollector()->getRoutes() as $route) {
-            echo $route->getPattern() . PHP_EOL;
-        }
-
+        // ⚠️ Verificar que se usa la base de datos de test
+        $this->assertUsingTestDatabase($app);
 
         return $app;
     }
@@ -123,5 +128,12 @@ abstract class BaseTestCase extends TestCase
             });
 
         return $repository;
+    }
+
+    protected function assertUsingTestDatabase(App $app): void
+    {
+        $pdo = $app->getContainer()->get(PDO::class);
+        $result = $pdo->query("SELECT DATABASE()")->fetchColumn();
+        $this->assertEquals('test', $result, 'La base de datos debe ser "test"');
     }
 }
