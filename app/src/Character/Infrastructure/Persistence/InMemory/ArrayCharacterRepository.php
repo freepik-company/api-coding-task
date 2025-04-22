@@ -7,6 +7,12 @@ use App\Character\Domain\CharacterFactory;
 use App\Character\Domain\CharacterRepository;
 use App\Character\Infrastructure\Persistence\Pdo\Exception\CharacterNotFoundException;
 
+/**
+ * ArrayCharacterRepository is a repository that manages characters in memory.
+ *
+ * @api
+ * @package App\Character\Infrastructure\Persistence\InMemory
+ */
 class ArrayCharacterRepository implements CharacterRepository
 {
     public function __construct(

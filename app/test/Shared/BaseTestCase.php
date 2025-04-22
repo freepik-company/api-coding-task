@@ -17,7 +17,7 @@ use Slim\Psr7\Request as SlimRequest;
 use Slim\Psr7\Uri;
 use PHPUnit\Framework\MockObject\MockObject;
 use PDO;
-
+use Slim\Middleware\BodyParserMiddleware;
 
 abstract class BaseTestCase extends TestCase
 {
@@ -60,6 +60,10 @@ abstract class BaseTestCase extends TestCase
         AppFactory::setContainer($container);
         $app = AppFactory::create();
 
+        // Agregar el middleware para pasear a JSON
+        $app->addBodyParsingMiddleware();
+
+        // Cargar rutas
         $routes = require dirname(__DIR__, 2) . '/config/routes.php';
         $routes($app);
 

@@ -8,17 +8,27 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * DeleteFactionController is a class that is used to delete a faction.
- *
+ * @api
  * @package App\Faction\Infrastructure\Http
  */
-
 class DeleteFactionController
 {
+    /**
+     * @api
+     * @param DeleteFactionUseCase $useCase
+     */
     public function __construct(
         private DeleteFactionUseCase $useCase
     ) {}
 
+    /**
+     * @api
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return Response
+     * @throws FactionNotFoundException
+     */
     public function __invoke(Request $request, Response $response, array $args): Response
     {
         try {

@@ -4,6 +4,12 @@ namespace App\Character\Domain;
 
 use App\Character\Domain\Character;
 
+/**
+ * CharacterToArrayTransformer is a transformer that transforms a character to an array.
+ *
+ * @api
+ * @package App\Character\Domain
+ */
 class CharacterToArrayTransformer
 {
 

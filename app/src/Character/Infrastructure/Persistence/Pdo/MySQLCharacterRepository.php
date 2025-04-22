@@ -9,6 +9,12 @@ use App\Character\Infrastructure\Persistence\Pdo\Exception\CharacterNotFoundExce
 use App\Shared\Infrastructure\Pdo\Exception\RowInsertionFailedException as ExceptionRowInsertionFailedException;
 use PDO;
 
+/**
+ * MySQLCharacterRepository is a repository that manages characters in MySQL.
+ *
+ * @api
+ * @package App\Character\Infrastructure\Persistence\Pdo
+ */
 class MySQLCharacterRepository implements CharacterRepository
 {
     public function __construct(private PDO $pdo) {}

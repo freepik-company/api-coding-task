@@ -116,7 +116,9 @@ class CreateEquipmentControllerTest extends BaseTestCase
             ->willThrowException(new \Exception('Boom! Something went wrong'));
 
         // Reemplazamos el controlador en la app manualmente
-        $this->app->getContainer()->set(
+        /** @var \DI\Container $container */
+        $container = $this->app->getContainer();
+        $container->set(
             \App\Equipment\Application\CreateEquipmentUseCase::class,
             fn() => $mockUseCase
         );

@@ -8,6 +8,12 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Character\Application\CreateCharacterUseCaseRequest;
 
+/**
+ * CreateCharacterController is a controller that creates a character.
+ *
+ * @api
+ * @package App\Character\Infrastructure\Http
+ */
 class CreateCharacterController
 {
     public function __construct(private CreateCharacterUseCase $useCase) {}

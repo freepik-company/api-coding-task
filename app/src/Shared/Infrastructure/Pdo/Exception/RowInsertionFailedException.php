@@ -2,6 +2,12 @@
 
 namespace App\Shared\Infrastructure\Pdo\Exception;
 
+/**
+ * RowInsertionFailedException is an exception that is thrown when a row insertion fails.
+ *
+ * @package App\Shared\Infrastructure\Pdo\Exception
+ */
+
 class RowInsertionFailedException extends \Exception
 {
 
@@ -11,5 +17,4 @@ class RowInsertionFailedException extends \Exception
     {
         return new self(self::MESSAGE);
     }
-
 }

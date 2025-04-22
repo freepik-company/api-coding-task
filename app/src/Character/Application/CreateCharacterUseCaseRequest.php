@@ -4,6 +4,9 @@ namespace App\Character\Application;
 
 /**
  * This class generate a request with the character data.
+ *
+ * @api
+ * @package App\Character\Application
  */
 
 class CreateCharacterUseCaseRequest

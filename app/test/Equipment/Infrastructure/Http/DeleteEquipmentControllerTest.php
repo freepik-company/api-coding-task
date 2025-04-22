@@ -3,7 +3,6 @@
 namespace App\Test\Equipment\Infrastructure\Http;
 
 use App\Equipment\Application\DeleteEquipmentUseCase;
-use App\Equipment\Domain\Equipment;
 use App\Equipment\Domain\EquipmentRepository;
 use App\Equipment\Infrastructure\Http\DeleteEquipmentController;
 use App\Equipment\Infrastructure\Persistence\InMemory\ArrayEquipmentRepository;

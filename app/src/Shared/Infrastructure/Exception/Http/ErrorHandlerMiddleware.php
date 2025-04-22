@@ -9,6 +9,12 @@ use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Exception\HttpMethodNotAllowedException;
 
+/**
+ * ErrorHandlerMiddleware is a middleware that handles errors.
+ *
+ * @package App\Shared\Infrastructure\Exception\Http
+ */
+
 class ErrorHandlerMiddleware implements MiddlewareInterface
 {
     public function process(Request $request, RequestHandler $handler): Response

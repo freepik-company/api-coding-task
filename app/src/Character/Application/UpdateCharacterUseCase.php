@@ -4,6 +4,9 @@ namespace App\Character\Application;
 
 /**
  * This use case is used to update a character
+ *
+ * @api
+ * @package App\Character\Application
  */
 
 use App\Character\Domain\Character;

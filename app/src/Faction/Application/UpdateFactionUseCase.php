@@ -4,6 +4,7 @@ namespace App\Faction\Application;
 
 use App\Faction\Domain\Faction;
 use App\Faction\Domain\FactionRepository;
+use App\Faction\Infrastructure\Persistence\Pdo\Exception\FactionNotFoundException;
 
 /**
  * UpdateFactionUseCase is a class that is used to update a faction.
@@ -23,7 +24,7 @@ class UpdateFactionUseCase
         $oldFaction = $this->repository->find($request->getId());
 
         if (!$oldFaction) {
-            throw new  \Exception('Faction not found');
+            throw FactionNotFoundException::build();
         }
 
         $updatedFaction = new Faction(

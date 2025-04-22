@@ -28,7 +28,7 @@ class UpdateFactionController
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             $response->getBody()->write(json_encode([
-                'error' => 'Invalid JSON',
+                'error' => 'Missing required field: faction_name',
                 'message' => json_last_error_msg()
             ]));
 

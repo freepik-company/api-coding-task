@@ -29,6 +29,28 @@ class CreateFactionUseCaseRequestMotherObject
     public static function validAsArray(): array
     {
         return [
+            'faction_name' => 'Rohirrim',
+            'description' => 'Los rohirrim se caracterizaban por ser altos, fornidos y de tez pálida y cabellos rubios, con ojos azules o verdes en su mayoría.'
+        ];
+    }
+
+    public static function missingNameAsArray(): array
+    {
+        return [
+            'description' => 'Los rohirrim se caracterizaban por ser altos, fornidos y de tez pálida y cabellos rubios, con ojos azules o verdes en su mayoría.'
+        ];
+    }
+
+    public static function emptyNameAsArray(): array
+    {
+        return [
+            'faction_name' => '',
+        ];
+    }
+
+    public static function invalidJsonAsArray(): array
+    {
+        return [
             'name' => 'Rohirrim',
             'description' => 'Los rohirrim se caracterizaban por ser altos, fornidos y de tez pálida y cabellos rubios, con ojos azules o verdes en su mayoría.'
         ];

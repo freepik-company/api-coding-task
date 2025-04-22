@@ -7,6 +7,12 @@ use App\Character\Domain\CharacterToArrayTransformer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
+/**
+ * ReadAllCharactersController is a controller that reads all characters.
+ *
+ * @api
+ * @package App\Character\Infrastructure\Http
+ */
 class ReadAllCharactersController
 {
     public function __construct(

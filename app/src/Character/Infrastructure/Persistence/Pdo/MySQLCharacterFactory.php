@@ -5,6 +5,12 @@ namespace App\Character\Infrastructure\Persistence\Pdo;
 use App\Character\Domain\Character;
 use App\Character\Domain\CharacterFactory;
 
+/**
+ * MySQLCharacterFactory is a factory that creates a character from an array.
+ *
+ * @api
+ * @package App\Character\Infrastructure\Persistence\Pdo
+ */
 class MySQLCharacterFactory
 {
     public static function buildFromArray(array $data): Character

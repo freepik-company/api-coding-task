@@ -2,6 +2,12 @@
 
 namespace App\Character\Application;
 
+/**
+ * UpdateCharacterUseCaseRequest is a request that updates a character.
+ *
+ * @api
+ * @package App\Character\Application
+ */
 class UpdateCharacterUseCaseRequest
 {
     public function __construct(
@@ -27,13 +33,13 @@ class UpdateCharacterUseCaseRequest
     {
         return $this->kingdom;
     }
-    
+
 
     public function getEquipmentId(): int
     {
         return $this->equipmentId;
     }
-    
+
     public function getFactionId(): int
     {
         return $this->factionId;
@@ -42,5 +48,5 @@ class UpdateCharacterUseCaseRequest
     public function getId(): int
     {
         return $this->id;
-    }   
+    }
 }

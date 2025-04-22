@@ -4,6 +4,11 @@ namespace App\Faction\Domain;
 
 use App\Faction\Domain\Exception\FactionValidationException;
 
+/**
+ * Faction is a class that represents a faction.
+ * @api
+ * @package App\Faction\Domain
+ */
 class Faction
 {
     // Properties
@@ -11,7 +16,13 @@ class Faction
     private string $description;
     private ?int $id = null;
 
-    // Constructor
+    /**
+     * @api
+     * @param string $faction_name
+     * @param string $description
+     * @param int|null $id
+     * @throws FactionValidationException
+     */
     public function __construct(
         string $faction_name,
         string $description,
@@ -34,17 +45,28 @@ class Faction
         $this->id = $id;
     }
 
-    //Getters
+    /**
+     * @api
+     * @return int|null
+     */
     public function getId(): ?int
     {
         return $this->id;
     }
 
+    /**
+     * @api
+     * @return string
+     */
     public function getFactionName(): string
     {
         return $this->faction_name;
     }
 
+    /**
+     * @api
+     * @return string
+     */
     public function getDescription(): string
     {
         return $this->description;

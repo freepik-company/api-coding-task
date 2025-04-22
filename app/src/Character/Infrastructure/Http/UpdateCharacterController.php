@@ -8,6 +8,12 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Character\Application\UpdateCharacterUseCaseRequest;
 
+/**
+ * UpdateCharacterController is a controller that updates a character.
+ *
+ * @api
+ * @package App\Character\Infrastructure\Http
+ */
 class UpdateCharacterController
 {
     public function __construct(

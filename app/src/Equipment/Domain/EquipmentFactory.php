@@ -2,6 +2,13 @@
 
 namespace App\Equipment\Domain;
 
+/**
+ * EquipmentFactory is a factory that builds an equipment.
+ *
+ * @api
+ * @package App\Equipment\Domain
+ */
+
 class EquipmentFactory
 {
     public static function build(

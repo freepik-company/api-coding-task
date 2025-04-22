@@ -4,8 +4,14 @@ namespace App\Character\Infrastructure\Persistence\Pdo;
 
 use App\Character\Domain\Character;
 
-class MySQLCharacterToArrayTransformer{
-
+/**
+ * MySQLCharacterToArrayTransformer is a transformer that transforms a character to an array.
+ *
+ * @api
+ * @package App\Character\Infrastructure\Persistence\Pdo
+ */
+class MySQLCharacterToArrayTransformer
+{
     public static function transform(Character $character): array
     {
         $data = [
@@ -16,11 +22,10 @@ class MySQLCharacterToArrayTransformer{
             'faction_id' => $character->getFactionId()
         ];
 
-        if(null !== $character->getId()){
+        if (null !== $character->getId()) {
             $data['id'] = $character->getId();
         }
 
         return $data;
     }
-    
 }

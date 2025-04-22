@@ -9,19 +9,30 @@ use Psr\Log\LoggerInterface;
 use Redis;
 
 /**
- * CachedMySQLEquipmentRepository is a class that is used to cache the equipment repository.
+ * CachedMySQLFactionRepository es una clase que se utiliza para cachear el repositorio de facciones.
  *
- * @package App\Faction\Infrastructure\Cache
+ * @api
+ * @package App\Faction\Infrastructure\Persistence\Cache
  */
-
 class CachedMySQLFactionRepository implements FactionRepository
 {
+    /**
+     * @api
+     * @param MySQLFactionRepository $repository
+     * @param Redis $redis
+     * @param LoggerInterface $logger
+     */
     public function __construct(
         private MySQLFactionRepository $repository,
         private Redis $redis,
         private LoggerInterface $logger
     ) {}
 
+    /**
+     * @api
+     * @param int $id
+     * @return Faction|null
+     */
     public function find(int $id): ?Faction
     {
         $cacheKey = "faction:{$id}";
@@ -35,9 +46,17 @@ class CachedMySQLFactionRepository implements FactionRepository
         $this->logger->debug("Cache miss for faction {$id}");
         $faction = $this->repository->find($id);
 
+        if ($faction) {
+            $this->redis->set($cacheKey, serialize($faction));
+        }
+
         return $faction;
     }
 
+    /**
+     * @api
+     * @return array<Faction>
+     */
     public function findAll(): array
     {
         $cacheKey = "factions:all";
@@ -49,20 +68,37 @@ class CachedMySQLFactionRepository implements FactionRepository
         }
 
         $this->logger->debug("Cache miss for all factions");
-        return $this->repository->findAll();
+        $factions = $this->repository->findAll();
+
+        if (!empty($factions)) {
+            $this->redis->set($cacheKey, serialize($factions));
+        }
+
+        return $factions;
     }
 
+    /**
+     * @api
+     * @param Faction $faction
+     * @return Faction
+     */
     public function save(Faction $faction): Faction
     {
         $savedFaction = $this->repository->save($faction);
 
-        // Invalidate cache
-        $this->redis->del("faction:{$savedFaction->getId()}");
+        // Guardar en caché
+        $this->redis->set("faction:{$savedFaction->getId()}", serialize($savedFaction));
+        // Invalidar el caché de todas las facciones
         $this->redis->del("factions:all");
 
         return $savedFaction;
     }
 
+    /**
+     * @api
+     * @param Faction $faction
+     * @return bool
+     */
     public function delete(Faction $faction): bool
     {
         $result = $this->repository->delete($faction);

@@ -6,6 +6,12 @@ use App\Equipment\Domain\Equipment;
 use App\Equipment\Domain\EquipmentFactory;
 use App\Equipment\Domain\EquipmentRepository;
 
+/**
+ * CreateEquipmentUseCase is a use case that creates an equipment.
+ *
+ * @api
+ * @package App\Equipment\Application
+ */
 class CreateEquipmentUseCase
 {
 

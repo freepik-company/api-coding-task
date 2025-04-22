@@ -8,8 +8,6 @@ use App\Equipment\Infrastructure\Persistence\Pdo\Exception\EquipmentNotFoundExce
 
 /**
  * This use case is used to update an equipment
- * @throws EquipmentNotFoundException if the equipment is not found
- * @throws InvalidRequestException if the request is invalid
  *
  */
 

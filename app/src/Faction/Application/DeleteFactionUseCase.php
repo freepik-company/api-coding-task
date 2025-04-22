@@ -3,7 +3,7 @@
 namespace App\Faction\Application;
 
 use App\Faction\Domain\FactionRepository;
-use App\Faction\Infrastructure\Persistence\Pdo\Exception\ExceptionFactionNotFoundException;
+use App\Faction\Infrastructure\Persistence\Pdo\Exception\FactionNotFoundException;
 
 /**
  * DeleteFactionUseCase is a class that is used to delete a faction.
@@ -22,7 +22,7 @@ class DeleteFactionUseCase
         $faction = $this->respository->find($id);
 
         if (!$faction) {
-            throw ExceptionFactionNotFoundException::build($id);
+            throw FactionNotFoundException::build($id);
         }
 
         $this->respository->delete($faction);

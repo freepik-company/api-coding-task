@@ -2,11 +2,17 @@
 
 namespace App\Character\Domain\Exception;
 
+/**
+ * CharacterValidationException is a domain exception that validates a character.
+ *
+ * @api
+ * @package App\Character\Domain\Exception
+ */
 class CharacterValidationException extends \DomainException
 {
     private const NAME_REQUIRED = 'Name is required';
     private const BIRTH_DATE_REQUIRED = 'Birth date is required';
-    private const BIRTH_DATE_INVALID_FORMAT= 'Birth date is invalid';
+    private const BIRTH_DATE_INVALID_FORMAT = 'Birth date is invalid';
     private const KINGDOM_REQUIRED = 'Kingdom is required';
     private const EQUIPMENT_ID_REQUIRED = 'Equipment ID is required';
     private const EQUIPMENT_ID_NON_POSITIVE = 'Equipment ID must be greater than 0';
@@ -15,7 +21,8 @@ class CharacterValidationException extends \DomainException
     private const ID_NON_POSITIVE = 'ID must be greater than 0';
 
 
-    private function __construct(string $message){
+    private function __construct(string $message)
+    {
         parent::__construct($message);
     }
 

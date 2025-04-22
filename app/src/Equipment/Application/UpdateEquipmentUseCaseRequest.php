@@ -2,6 +2,13 @@
 
 namespace App\Equipment\Application;
 
+/**
+ * UpdateEquipmentUseCaseRequest is a request that updates an equipment.
+ *
+ * @api
+ * @package App\Equipment\Application
+ */
+
 class UpdateEquipmentUseCaseRequest
 {
     public function __construct(

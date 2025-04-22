@@ -7,6 +7,12 @@ use App\Character\Infrastructure\Persistence\Pdo\Exception\CharacterNotFoundExce
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
+/**
+ * DeleteCharacterController is a controller that deletes a character.
+ *
+ * @api
+ * @package App\Character\Infrastructure\Http
+ */
 class DeleteCharacterController
 {
     public function __construct(private DeleteCharacterUseCase $useCase) {}
